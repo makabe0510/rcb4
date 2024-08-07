@@ -1,7 +1,14 @@
+<?xml version="1.0"?>
 <launch>
 
-  <arg name="urdf_path" default="$(find kxr_models)/urdf/kxrl2l2a6h2m.urdf" />
-  <arg name="servo_config_path" default="$(find kxr_models)/config/kxrl2l2a6h2m_servo_config.yaml" />
+  <!-- default setting -->
+  <!-- <arg name="urdf_path" default="$(find kxr_models)/urdf/kxrl2l2a6h2m.urdf" /> -->
+  <!-- <arg name="servo_config_path" default="$(find kxr_models)/config/kxrl2l2a6h2m_servo_config.yaml" /> -->
+
+  <!-- for worm_and_servo_cisetup setting-->
+  <arg name="urdf_path" default="$(find worm_and_servo_cisetup)/urdf/worm_and_servo_cisetup.urdf" />
+  <arg name="servo_config_path" default="$(find worm_and_servo_cisetup)/config/joint_names_worm_and_servo_cisetup_servo_config.yaml" />
+
   <arg name="namespace" default="" />
   <arg name="publish_imu" default="true" />
   <arg name="publish_sensor" default="false" />
