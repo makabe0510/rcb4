@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+
+from __future__ import print_function
+
+import time
+import rospy
+from std_msgs.msg import String
+from kxr_controller.kxr_interface import KXRROSRobotInterface
+from kxr_models.download_urdf import download_urdf_mesh_files
+from skrobot.model import RobotModel
+import numpy as np
+
+# ROSノードの初期化
+rospy.init_node('neck_motion_control', anonymous=True)
+
+# URDFのダウンロードとロボットモデルの初期化
+namespace = ''
+download_urdf_mesh_files(namespace)
+robot_model = RobotModel()
+robot_model.load_urdf_from_robot_description(
+    namespace + '/robot_description_viz')
+ri = KXRROSRobotInterface(robot_model, namespace=namespace, controller_timeout=60.0)
+
+# サーボをONにし、init_pose
+ri.servo_on()
+ri.angle_vector(robot_model.init_pose())
+rospy.loginfo('init_pose')
+
+# nod動作
+def nod(send_time=1):
+    ri.angle_vector(robot_model.init_pose())
+    robot_model.head_neck_pitch.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+    time.sleep(1)
+    robot_model.head_neck_pitch.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+
+# disagree動作
+def disagree(send_time=1):
+    ri.angle_vector(robot_model.init_pose())
+    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+    time.sleep(1)
+    robot_model.head_neck_yaw.joint_angle(np.deg2rad(-30))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+    time.sleep(1)
+    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+    time.sleep(1)
+    robot_model.head_neck_yaw.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+
+# tilt動作
+def tilt(send_time=1):
+    ri.angle_vector(robot_model.init_pose())
+    robot_model.head_neck_roll.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+    time.sleep(2)
+    robot_model.head_neck_roll.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time)
+
+# コールバック関数
+def neck_motion_callback(msg):
+    command = msg.data.lower()
+    if command == 'nod':
+        rospy.loginfo('Executing nod motion')
+        nod()
+    elif command == 'disagree':
+        rospy.loginfo('Executing disagree motion')
+        disagree()
+    elif command == 'tilt':
+        rospy.loginfo('Executing tilt motion')
+        tilt()
+    elif command == 'test':  # testメッセージに対応
+        rospy.loginfo('Executing test motions')
+        test()
+    else:
+        rospy.logwarn(f'Unknown command received: {command}')
+        
+# テスト用関数
+def test():
+    ri.angle_vector(robot_model.init_pose())
+    time.sleep(1)
+    nod()
+    time.sleep(2)
+    disagree()
+    time.sleep(2)
+    tilt()
+
+# メイン関数
+def main():
+    # /neck_motionトピックを購読し、neck_motion_callback関数をコールバックに指定
+    rospy.Subscriber('/neck_motion', String, neck_motion_callback)
+
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except rospy.ROSInterruptException:
+        pass
