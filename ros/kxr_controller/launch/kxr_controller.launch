@@ -13,6 +13,7 @@
   <arg name="device" default="" doc="Device path"/>
   <arg name="model_server_port" default="8123" />
   <arg name="joint_group_description" default="" />
+  <arg name="frame_count" default="50" />
 
   <group if="$(eval len(arg('namespace')) > 0)" ns="$(arg namespace)" >
     <param name="control_loop_rate" value="$(arg control_loop_rate)" />
@@ -41,6 +42,7 @@
         control_pressure: $(arg control_pressure)
         imu_frame_id: $(arg namespace)/$(arg imu_frame_id)
         use_rcb4: $(arg use_rcb4)
+        frame_count: $(arg frame_count)
       </rosparam>
     </node>
     <node name="urdf_model_server"
@@ -75,6 +77,7 @@
         control_pressure: $(arg control_pressure)
         imu_frame_id: $(arg imu_frame_id)
         use_rcb4: $(arg use_rcb4)
+        frame_count: $(arg frame_count)
       </rosparam>
     </node>
 

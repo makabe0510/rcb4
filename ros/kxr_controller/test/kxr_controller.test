@@ -2,12 +2,14 @@
 
   <arg name="namespace" default="" />
   <arg name="use_rcb4" default="false" doc="Flag to use RCB4 mini board"/>
+  <arg name="frame_count" default="50" />
 
   <include file="$(find kxr_controller)/launch/kxr_controller.launch">
     <arg name="urdf_path" value="$(find kxr_models)/urdf/kxr_test_head.urdf" />
     <arg name="servo_config_path" value="$(find kxr_models)/config/kxr_test_head_servo_config.yaml" />
     <arg name="namespace" value="$(arg namespace)" />
     <arg name="use_rcb4" value="$(arg use_rcb4)" />
+    <arg name="frame_count" value="$(arg frame_count)" />
   </include>
 
   <group if="$(eval len(arg('namespace')) > 0)" ns="$(arg namespace)" >
@@ -20,12 +22,10 @@
           timeout_0: 30
           topic_1: joint_states
           timeout_1: 30
-          topic_2: kxr_fullbody_controller/follow_joint_trajectory/status
+          topic_2: fullbody_controller/follow_joint_trajectory/status
           timeout_2: 30
-          topic_3: kxr_fullbody_controller/servo_on_off_real_interface/status
+          topic_3: fullbody_controller/servo_on_off_real_interface/status
           timeout_3: 30
-          topic_4: kxr_fullbody_controller/servo_on_off/status
-          timeout_4: 30
         </rosparam>
     </test>
 
@@ -53,12 +53,10 @@
         timeout_0: 30
         topic_1: joint_states
         timeout_1: 30
-        topic_2: kxr_fullbody_controller/follow_joint_trajectory/status
+        topic_2: fullbody_controller/follow_joint_trajectory/status
         timeout_2: 30
-        topic_3: kxr_fullbody_controller/servo_on_off_real_interface/status
+        topic_3: fullbody_controller/servo_on_off_real_interface/status
         timeout_3: 30
-        topic_4: kxr_fullbody_controller/servo_on_off/status
-        timeout_4: 30
       </rosparam>
     </test>
 

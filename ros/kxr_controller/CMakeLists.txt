@@ -34,6 +34,7 @@ if(USE_VIRTUALENV)
     catkin_virtualenv
     actionlib
     actionlib_msgs
+    dynamic_reconfigure
     std_msgs
     roscpp
     cmake_modules
@@ -46,6 +47,7 @@ else()
   find_package(catkin REQUIRED COMPONENTS
     actionlib
     actionlib_msgs
+    dynamic_reconfigure
     std_msgs
     roscpp
     cmake_modules
@@ -63,12 +65,17 @@ catkin_python_setup()
 
 add_action_files(
   DIRECTORY action
-  FILES ServoOnOff.action Stretch.action PressureControl.action
+  FILES ServoOnOff.action AdjustAngleVector.action Stretch.action PressureControl.action
 )
 
 add_message_files(
   DIRECTORY msg
   FILES Stretch.msg ServoOnOff.msg PressureControl.msg
+)
+
+# generate the dynamic_reconfigure config file
+generate_dynamic_reconfigure_options(
+  cfg/KXRParameteres.cfg
 )
 
 generate_messages(
@@ -133,6 +140,6 @@ if(CATKIN_ENABLE_TESTING)
   endif()
   add_rostest(test/kxr_controller.test ARGS namespace:="")
   add_rostest(test/kxr_controller.test ARGS namespace:="robot_a")
-  add_rostest(test/kxr_controller.test ARGS namespace:="" use_rcb4:=true)
-  add_rostest(test/kxr_controller.test ARGS namespace:="robot_a" use_rcb4:=true)
+  add_rostest(test/kxr_controller.test ARGS namespace:="" use_rcb4:=true frame_count:=5)
+  add_rostest(test/kxr_controller.test ARGS namespace:="robot_a" use_rcb4:=true frame_count:=5)
 endif()
