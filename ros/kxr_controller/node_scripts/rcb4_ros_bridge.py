@@ -366,6 +366,7 @@ class RCB4ROSBridge:
             idx = self.interface.servo_id_to_index(servo_id)
             if idx is None:
                 continue
+            self.interface.joint_to_actuator_matrix  # NOQA
             self.interface._joint_to_actuator_matrix[idx, idx] = (
                 direction * self.interface._joint_to_actuator_matrix[idx, idx]
             )

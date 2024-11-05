@@ -23,6 +23,9 @@ ri = KXRROSRobotInterface(robot_model, namespace=namespace, controller_timeout=6
 
 # サーボをONにし、init_pose
 ri.servo_on()
+rospy.sleep(1.0)
+ri.send_stretch(30)
+rospy.sleep(1.0)
 ri.angle_vector(robot_model.init_pose())
 rospy.loginfo('init_pose')
 
@@ -31,33 +34,36 @@ def nod(send_time=1):
     ri.angle_vector(robot_model.init_pose())
     robot_model.head_neck_pitch.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
-    time.sleep(1)
+    ri.wait_interpolation()
     robot_model.head_neck_pitch.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.wait_interpolation()    
 
 # disagree動作
 def disagree(send_time=1):
     ri.angle_vector(robot_model.init_pose())
     robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
-    time.sleep(1)
+    ri.wait_interpolation()
     robot_model.head_neck_yaw.joint_angle(np.deg2rad(-30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
-    time.sleep(1)
+    ri.wait_interpolation()
     robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
-    time.sleep(1)
+    ri.wait_interpolation()
     robot_model.head_neck_yaw.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.wait_interpolation()    
 
 # tilt動作
 def tilt(send_time=1):
     ri.angle_vector(robot_model.init_pose())
     robot_model.head_neck_roll.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
-    time.sleep(2)
+    ri.wait_interpolation()
     robot_model.head_neck_roll.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.wait_interpolation()    
 
 # コールバック関数
 def neck_motion_callback(msg):
@@ -80,11 +86,11 @@ def neck_motion_callback(msg):
 # テスト用関数
 def test():
     ri.angle_vector(robot_model.init_pose())
-    time.sleep(1)
+    ri.wait_interpolation()
     nod()
-    time.sleep(2)
+    ri.wait_interpolation()    
     disagree()
-    time.sleep(2)
+    ri.wait_interpolation()    
     tilt()
 
 # メイン関数
