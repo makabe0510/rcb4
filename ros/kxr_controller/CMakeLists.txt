@@ -70,7 +70,7 @@ add_action_files(
 
 add_message_files(
   DIRECTORY msg
-  FILES Stretch.msg ServoOnOff.msg PressureControl.msg
+  FILES Stretch.msg ServoOnOff.msg PressureControl.msg ServoState.msg ServoStateArray.msg
 )
 
 # generate the dynamic_reconfigure config file

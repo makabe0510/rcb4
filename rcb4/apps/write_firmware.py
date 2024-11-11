@@ -34,14 +34,33 @@ def flash_bin_to_device(st_flash_path, bin_path):
 
 
 def main():
+    print("Checking dependencies...")
     check_dependencies()
+    print("Dependencies are satisfied.")
 
+    print("Locating ST-Link path...")
     st_flash_path = stlink()
-    elf_path = kondoh7_elf()
+    if not st_flash_path:
+        print("Error: ST-Link path not found. Please check your installation of stlink.")
+        sys.exit(4)
+    print(f"ST-Link path found: {st_flash_path}")
+
+    print("Retrieving latest ELF file...")
+    elf_path = kondoh7_elf('latest')
+    if not elf_path or not Path(elf_path).is_file():
+        print("Error: ELF file not found. Please check the path or filename.")
+        sys.exit(5)
+    print(f"ELF file found: {elf_path}")
+
     bin_path = Path(elf_path).with_suffix(".bin")
+    print(f"Converting ELF to BIN: {bin_path}")
 
     convert_elf_to_bin(elf_path, bin_path)
+    print("ELF successfully converted to BIN.")
+
+    print("Flashing BIN to device...")
     flash_bin_to_device(st_flash_path, bin_path)
+    print("BIN successfully flashed to device.")
 
 
 if __name__ == "__main__":

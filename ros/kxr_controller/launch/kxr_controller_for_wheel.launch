@@ -11,6 +11,10 @@
   <arg name="namespace" default="" />
   <arg name="joint_group_description" default="" />
   <arg name="frame_count" default="50" />
+  <arg name="current_limit" default="4.0" doc="current limit in Amp" />
+  <arg name="temperature_limit" default="80" doc="Temperature limit in celsius" />
+  <arg name="read_current" default="false" />
+  <arg name="read_temperature" default="false" />
 
   <include file="$(find kxr_controller)/launch/kxr_controller.launch" >
     <arg name="urdf_path" value="$(arg urdf_path)" />
@@ -24,6 +28,10 @@
     <arg name="namespace" value="$(arg namespace)" />
     <arg name="joint_group_description" value="$(arg joint_group_description)" />
     <arg name="frame_count" value="$(arg frame_count)" />
+    <arg name="current_limit" value="$(arg current_limit)" />
+    <arg name="temperature_limit" value="$(arg temperature_limit)" />
+    <arg name="read_current" value="$(arg read_current)" />
+    <arg name="read_temperature" value="$(arg read_temperature)" />
   </include>
 
   <group if="$(eval len(arg('namespace')) > 0)" ns="$(arg namespace)" >

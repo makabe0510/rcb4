@@ -43,12 +43,14 @@
 
 
 (defclass kxr-interface
-  :super robot-interface
+  ;; :super robot-interface
+  :super robot-move-base-interface
   :slots (joint-names servo-on-off-client controller-name control-pressure))
 
 
 (defmethod kxr-interface
-  (:init (robot &rest args &key (type :default-controller) &allow-other-keys)
+  (:init (robot &rest args &key (type :default-controller)
+                (input-joint-names nil) &allow-other-keys)
    (let* ((namespace (cadr (memq :namespace args)))
           (c-name (cadr (memq :controller-name args)))
           (joint-param (if namespace (format nil "~A/~A/joints" namespace c-name)
@@ -57,7 +59,7 @@
                             (format nil "/rcb4_ros_bridge/control_pressure"))))
      (setq control-pressure (ros::get-param pressure-param nil))
      (setq controller-name (cadr (memq :controller-name args)))
-     (setq joint-names (ros::get-param joint-param nil))
+     (setq joint-names (ros::get-param joint-param input-joint-names))
      (while (and (ros::ok) (null joint-names))
        (ros::ros-info (format nil "Waiting ~A rosparam set" joint-param))
        (setq joint-names (ros::get-param joint-param nil))
@@ -65,6 +67,9 @@
 
    (send-super* :init :robot robot :type type
                 :groupname "kxr_interface"
+                :base-controller-action-name nil
+                :base-frame-id "base_link"
+                :cmd-vel-topic "/diff_drive_controller/cmd_vel"
                 args)
 
    (setq servo-on-off-client (instance ros::simple-action-client :init

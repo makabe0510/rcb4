@@ -40,6 +40,12 @@ def main():
             viewer = TrimeshSceneViewer(resolution=(640, 480))
             viewer.add(robot_model)
             viewer.show()
+        elif args.viewer == "pyrender":
+            from skrobot.viewers import PyrenderViewer
+
+            viewer = PyrenderViewer(resolution=(640, 480))
+            viewer.add(robot_model)
+            viewer.show()
         else:
             raise NotImplementedError(f"Not supported viewer {args.viewer}")
 
