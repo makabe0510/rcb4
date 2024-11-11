@@ -1,5 +1,18 @@
 # rcb4
 
+## Install
+
+```bash
+pip install rcb4
+```
+## Write firmware
+
+Connect st-link and run the following command.
+
+```bash
+rcb4-write-firmware
+```
+
 ## Contributing
 
 ### Automatic Formatting

@@ -31,5 +31,7 @@ def download_urdf_mesh_files(namespace=None):
     while not osp.exists(compressed_urdf_path):
         rospy.loginfo(f"Waiting {compressed_urdf_path} from server")
         rospy.sleep(1.0)
-        gdown.cached_download(url=server_url, path=compressed_urdf_path)
+        gdown.cached_download(url=server_url,
+                              hash=f'md5:{urdf_hash}',
+                              path=compressed_urdf_path)
     gdown.extractall(osp.join(kxr_models_path, "models", "urdf", f"{urdf_hash}.tar.gz"))

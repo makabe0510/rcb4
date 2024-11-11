@@ -26,6 +26,10 @@ from rcb4.ctype_utils import c_type_to_size
 from rcb4.data import kondoh7_elf
 from rcb4.rcb4interface import CommandTypes
 from rcb4.rcb4interface import deg_to_servovector
+from rcb4.rcb4interface import interpolate_currents
+from rcb4.rcb4interface import interpolate_or_extrapolate_current_settings
+from rcb4.rcb4interface import interpolate_or_extrapolate_temperature_settings
+from rcb4.rcb4interface import interpolate_or_extrapolate_temperatures
 from rcb4.rcb4interface import rcb4_dof
 from rcb4.rcb4interface import RCB4Interface
 from rcb4.rcb4interface import ServoOnOffValues
@@ -282,7 +286,10 @@ class ARMH7Interface:
 
     def check_ack(self):
         ack_byte_list = self.get_ack()
-        return ack_byte_list[1] == 0x06
+        if ack_byte_list is not None and len(ack_byte_list) > 1:
+            return ack_byte_list[1] == 0x06
+        else:
+            return False
 
     def check_firmware_version(self):
         version = self.get_version()
@@ -705,6 +712,8 @@ class ARMH7Interface:
                 self.servo_on_states_dict[index] = True
             else:
                 self.servo_on_states_dict[index] = False
+        # internally call actuator_to_joint_matrix to initialize it.
+        self.actuator_to_joint_matrix  # NOQA
         return servo_indices
 
     def search_air_board_ids(self):
@@ -907,6 +916,38 @@ class ARMH7Interface:
             + encode_servo_ids_to_5bytes_bin(servo_ids)
             + [ServoParams.Stretch.value]
             + rcb4_servo_svector(servo_ids, value)
+        )
+        byte_list.insert(0, 2 + len(byte_list))
+        byte_list.append(rcb4_checksum(byte_list))
+        return self.serial_write(byte_list)
+
+    def send_current_limit(self, current_limit_a=4.0, servo_ids=None):
+        if servo_ids is None:
+            servo_ids = self.servo_sorted_ids
+        current_setting = interpolate_or_extrapolate_current_settings(current_limit_a)
+        if not isinstance(current_setting, (list, tuple)):
+            current_setting = [current_setting] * len(servo_ids)
+        byte_list = (
+            [CommandTypes.ServoParam.value]
+            + encode_servo_ids_to_5bytes_bin(servo_ids)
+            + [ServoParams.CurrentLimit.value]
+            + rcb4_servo_svector(servo_ids, current_setting)
+        )
+        byte_list.insert(0, 2 + len(byte_list))
+        byte_list.append(rcb4_checksum(byte_list))
+        return self.serial_write(byte_list)
+
+    def send_temperature_limit(self, temperature_limit_c=80, servo_ids=None):
+        if servo_ids is None:
+            servo_ids = self.servo_sorted_ids
+        temperature_setting = interpolate_or_extrapolate_temperature_settings(temperature_limit_c)
+        if not isinstance(temperature_setting, (list, tuple)):
+            temperature_setting = [temperature_setting] * len(servo_ids)
+        byte_list = (
+            [CommandTypes.ServoParam.value]
+            + encode_servo_ids_to_5bytes_bin(servo_ids)
+            + [ServoParams.TemperatureLimit.value]
+            + rcb4_servo_svector(servo_ids, temperature_setting)
         )
         byte_list.insert(0, 2 + len(byte_list))
         byte_list.append(rcb4_checksum(byte_list))
@@ -1407,6 +1448,79 @@ class ARMH7Interface:
                 servo_on_ids = servo_on_ids[~mask]
             return servo_on_ids
         return []
+
+    def switch_reading_servo_current(self, enable=True):
+        if enable:
+            value = 1
+        else:
+            value = 0
+        return self.write_cstruct_slot_v(SystemStruct, "servo_current_read_flag", [value])
+
+    def read_servo_current(self):
+        servo_ids = self.search_servo_ids()
+        if len(servo_ids) == 0:
+            return np.zeros(shape=0)
+
+        current_vector = self.read_cstruct_slot_vector(ServoStruct, "current")
+        servo_current_vector = np.array(current_vector[servo_ids], dtype=np.float32)
+
+        # Create a mask for non-zero values (i.e., values that are valid and need processing)
+        inverted_servo_mask = servo_current_vector >= 64
+        inverted_zero_servo_mask = servo_current_vector == 64
+        if np.any(inverted_zero_servo_mask):
+            servo_current_vector[inverted_zero_servo_mask] += 0.000001
+        servo_current_vector[inverted_servo_mask] -= 64
+
+        # Apply calculations only on non-zero values
+        estimated_current_vector = interpolate_currents(servo_current_vector)
+        estimated_current_vector[inverted_servo_mask] *= -1.0
+        return estimated_current_vector
+
+    def read_current_limit(self, servo_ids=None):
+        if servo_ids is None:
+            servo_ids = self.servo_sorted_ids
+        current_vector = [
+            self.servo_param64(sid, ["current_limit"])["current_limit"]
+            for sid in servo_ids
+        ]
+        return interpolate_currents(current_vector)
+
+    def switch_reading_servo_temperature(self, enable=True):
+        if enable:
+            value = 1
+        else:
+            value = 0
+        return self.write_cstruct_slot_v(
+            SystemStruct, "servo_temperature_read_flag", [value]
+        )
+
+    def read_servo_temperature(self):
+        servo_ids = self.search_servo_ids()
+        if len(servo_ids) == 0:
+            return np.zeros(shape=0)
+
+        temperature_vector = self.read_cstruct_slot_vector(ServoStruct, "temperature")
+        servo_temperatures = temperature_vector[servo_ids]
+
+        # Create a mask for non-zero values (i.e., values that are valid and need processing)
+        non_zero_mask = servo_temperatures != 0
+
+        # Apply calculations only on non-zero values
+        estimated_temperatures = np.zeros_like(servo_temperatures, dtype=np.float32)
+        if np.any(non_zero_mask):
+            estimated_temperatures[non_zero_mask] = interpolate_or_extrapolate_temperatures(
+                servo_temperatures[non_zero_mask]
+            )
+        return estimated_temperatures
+
+    def read_temperature_limit(self, servo_ids=None):
+        if servo_ids is None:
+            servo_ids = self.servo_sorted_ids
+        temperature_vector = [
+            self.servo_param64(sid, ["temperature_limit"])["temperature_limit"]
+            for sid in servo_ids
+        ]
+        return interpolate_or_extrapolate_temperatures(temperature_vector)
 
 
 if __name__ == "__main__":

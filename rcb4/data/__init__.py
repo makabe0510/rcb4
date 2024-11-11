@@ -36,11 +36,18 @@ elf_infos = {
 }
 
 
+def get_latest_version(elf_infos):
+    latest_version = sorted(elf_infos.keys())[-1]
+    return latest_version, elf_infos[latest_version]
+
+
 def get_cache_dir():
     return os.environ.get("RCB4_CACHE_DIR", _default_cache_dir)
 
 
-def kondoh7_elf(version="v0.6.2"):
+def kondoh7_elf(version="latest"):
+    if version == 'latest':
+        version, _ = get_latest_version(elf_infos)
     if version not in elf_infos:
         raise RuntimeError(
             f"Invalid armh7 version. Valid versions are {list(elf_infos.keys())}"
