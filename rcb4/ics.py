@@ -297,9 +297,11 @@ class ICSServoController:
                     sys.stdout.write("\033[H\033[J")
                     sys.stdout.flush()
                     print(f"{Fore.RED}Connection is not open.{Style.RESET_ALL}")
-                    print(
-                        f"{Fore.RED}Are you using dual USB? Is it set to ICS mode? Have you connected the servo?{Style.RESET_ALL}"
-                    )
+                    print(f"{Fore.RED}Please check the following:")
+                    print("1. Use Dual USB Adapter (https://kondo-robot.com/product/02116)")
+                    print("2. Set the device to ICS mode.")
+                    print(f"3. Connect only one servo correctly.{Style.RESET_ALL}")
+
                     print(
                         f"{Fore.RED}To establish the connection, please execute the following commands in Linux:{Style.RESET_ALL}"
                     )
