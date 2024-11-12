@@ -13,6 +13,14 @@ Connect st-link and run the following command.
 rcb4-write-firmware
 ```
 
+## Change Servo ID
+
+You can use ics-manager command to change servo id.
+
+```bash
+ics-manager
+```
+
 ## Contributing
 
 ### Automatic Formatting
