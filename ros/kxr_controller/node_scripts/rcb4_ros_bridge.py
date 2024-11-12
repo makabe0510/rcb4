@@ -401,7 +401,9 @@ class RCB4ROSBridge:
                 if ret is None:
                     return log_error_and_close_interface("set trim_vector")
         if self.interface.wheel_servo_sorted_ids is None:
-            self.interface.wheel_servo_sorted_ids = wheel_servo_sorted_ids
+            self.interface.wheel_servo_sorted_ids = []
+        self.interface.wheel_servo_sorted_ids = list(
+            set(self.interface.wheel_servo_sorted_ids + wheel_servo_sorted_ids))
 
         # set servo ids to rosparam
         servo_ids = self.get_ids(type="servo")
