@@ -91,6 +91,9 @@ class ICSServoController:
 
     def open_connection(self):
         ports = serial.tools.list_ports.comports()
+        if len(ports) == 0:
+            print(f"{Fore.RED}No USB Found.{Style.RESET_ALL}")
+            print(f"{Fore.RED}May Dual USB Adapter is wrong.{Style.RESET_ALL}")
         for p in ports:
             if p.vid == 0x165C and p.pid == 0x08:
                 for baudrate in [115200, 625000, 1250000]:
@@ -141,7 +144,8 @@ class ICSServoController:
         self.ics.write(bytes([0xFF, 0x00, 0x00, 0x00]))
         time.sleep(0.1)
         ret = self.ics.read(5)
-        return ret[4] & 0x1F
+        servo_id = ret[4] & 0x1F
+        return servo_id
 
     def set_servo_id(self, servo_id):
         self.ics.write(bytes([0xE0 | (0x1F & servo_id), 0x01, 0x01, 0x01]))
@@ -276,6 +280,7 @@ class ICSServoController:
     def close_connection(self):
         if self.ics and self.ics.is_open:
             self.ics.close()
+        self.ics = None
 
     def display_status(self):
         options = [
@@ -291,6 +296,7 @@ class ICSServoController:
         selectable_options = ["Current Servo ID", "Angle"]
         try:
             use_previous_result = False
+            previous_servo_id = None
             while True:
                 if not self.ics or not self.ics.is_open:
                     # Clear the previous output at the start of each loop
@@ -323,94 +329,105 @@ class ICSServoController:
                 sys.stdout.flush()
 
                 # Print servo status
-                print("--- Servo Status ---")
-                if use_previous_result is False:
-                    _, result = self.read_param()
-                for i, option in enumerate(options):
-                    if i == self.selected_index:
-                        print(
-                            f">> {option}: {self.get_status(option, result, selected=True)}"
+                try:
+                    servo_id = self.get_servo_id()
+                    if servo_id != previous_servo_id:
+                        use_previous_result = False
+                    previous_servo_id = servo_id
+                    print("--- Servo Status ---")
+                    if use_previous_result is False:
+                        _, result = self.read_param()
+                    for i, option in enumerate(options):
+                        if i == self.selected_index:
+                            print(
+                                f">> {option}: {self.get_status(option, result, selected=True)}"
+                            )
+                        else:
+                            print(f"   {option}: {self.get_status(option, result, selected=False)}")
+
+                    print("----------------------\n")
+                    print(
+                        "Use ↑↓ to navigate, ←→ to adjust Current Servo ID or Servo Angles"
+                    )
+                    print(f"Press 'Enter' when Current Servo ID is selected to save the currently highlighted ID in {Fore.GREEN}green{Style.RESET_ALL}.")
+                    print("Press 'z' to reset servo position")
+                    print(
+                        "Press 'r' to toggle rotation mode (enables continuous wheel-like rotation)"
+                    )
+                    print("Press 'f' to set free mode\n")
+                    print("'q' to quit.")
+
+                    use_previous_result = False
+
+                    # Get key input without Enter
+                    key = readchar.readkey()
+
+                    # Perform actions based on key
+                    if key == "z":
+                        self.reset_servo_position()
+                    elif key == "r":
+                        self.toggle_rotation_mode()
+                    elif key == "f":
+                        self.set_free_mode()
+                    elif key == "q":
+                        print("Exiting...")
+                        break
+                    elif key == readchar.key.UP:
+                        self.selected_index = (self.selected_index - 1) % len(
+                            selectable_options
                         )
-                    else:
-                        print(f"   {option}: {self.get_status(option, result, selected=False)}")
-                print("----------------------\n")
-                print(
-                    "Use ↑↓ to navigate, ←→ to adjust Current Servo ID or Servo Angles"
-                )
-                print(f"Press 'Enter' when Current Servo ID is selected to save the currently highlighted ID in {Fore.GREEN}green{Style.RESET_ALL}.")
-                print("Press 'z' to reset servo position")
-                print(
-                    "Press 'r' to toggle rotation mode (enables continuous wheel-like rotation)"
-                )
-                print("Press 'f' to set free mode\n")
-                print("'q' to quit.")
-
-                use_previous_result = False
-
-                # Get key input without Enter
-                key = readchar.readkey()
-
-                # Perform actions based on key
-                if key == "z":
-                    self.reset_servo_position()
-                elif key == "r":
-                    self.toggle_rotation_mode()
-                elif key == "f":
-                    self.set_free_mode()
-                elif key == "q":
-                    print("Exiting...")
-                    break
-                elif key == readchar.key.UP:
-                    self.selected_index = (self.selected_index - 1) % len(
-                        selectable_options
-                    )
-                    use_previous_result = True
-                elif key == readchar.key.DOWN:
-                    self.selected_index = (self.selected_index + 1) % len(
-                        selectable_options
-                    )
-                    use_previous_result = True
-                elif (
-                    key == readchar.key.ENTER
-                    and selectable_options[self.selected_index] == "Current Servo ID"
-                ):
-                    self.set_servo_id(self.servo_id)
-                    time.sleep(0.3)
-                    if self.servo_id_to_rotation is not None:
-                        self.set_rotation(self.servo_id_to_rotation[self.servo_id])
+                        use_previous_result = True
+                    elif key == readchar.key.DOWN:
+                        self.selected_index = (self.selected_index + 1) % len(
+                            selectable_options
+                        )
+                        use_previous_result = True
+                    elif (
+                        key == readchar.key.ENTER
+                        and selectable_options[self.selected_index] == "Current Servo ID"
+                    ):
+                        self.set_servo_id(self.servo_id)
                         time.sleep(0.3)
-                elif (
-                    key == readchar.key.LEFT
-                    and selectable_options[self.selected_index] == "Current Servo ID"
-                ):
-                    use_previous_result = True
-                    if self.servo_id_index == 0:
-                        self.servo_id_index = len(self.servo_candidates) - 1
-                    else:
-                        self.servo_id_index = max(0, self.servo_id_index - 1)
-                    self.servo_id = self.servo_candidates[self.servo_id_index]
-                elif (
-                    key == readchar.key.RIGHT
-                    and selectable_options[self.selected_index] == "Current Servo ID"
-                ):
-                    use_previous_result = True
-                    if self.servo_id_index == len(self.servo_candidates) - 1:
-                        self.servo_id_index = 0
-                    else:
-                        self.servo_id_index = min(
-                            len(self.servo_candidates) - 1, self.servo_id_index + 1
-                        )
-                    self.servo_id = self.servo_candidates[self.servo_id_index]
-                elif (
-                    key == readchar.key.LEFT
-                    and selectable_options[self.selected_index] == "Angle"
-                ):
-                    self.decrease_angle()
-                elif (
-                    key == readchar.key.RIGHT
-                    and selectable_options[self.selected_index] == "Angle"
-                ):
-                    self.increase_angle()
+                        if self.servo_id_to_rotation is not None:
+                            self.set_rotation(self.servo_id_to_rotation[self.servo_id])
+                            time.sleep(0.3)
+                    elif (
+                        key == readchar.key.LEFT
+                        and selectable_options[self.selected_index] == "Current Servo ID"
+                    ):
+                        use_previous_result = True
+                        if self.servo_id_index == 0:
+                            self.servo_id_index = len(self.servo_candidates) - 1
+                        else:
+                            self.servo_id_index = max(0, self.servo_id_index - 1)
+                        self.servo_id = self.servo_candidates[self.servo_id_index]
+                    elif (
+                        key == readchar.key.RIGHT
+                        and selectable_options[self.selected_index] == "Current Servo ID"
+                    ):
+                        use_previous_result = True
+                        if self.servo_id_index == len(self.servo_candidates) - 1:
+                            self.servo_id_index = 0
+                        else:
+                            self.servo_id_index = min(
+                                len(self.servo_candidates) - 1, self.servo_id_index + 1
+                            )
+                        self.servo_id = self.servo_candidates[self.servo_id_index]
+                    elif (
+                        key == readchar.key.LEFT
+                        and selectable_options[self.selected_index] == "Angle"
+                    ):
+                        self.decrease_angle()
+                    elif (
+                        key == readchar.key.RIGHT
+                        and selectable_options[self.selected_index] == "Angle"
+                    ):
+                        self.increase_angle()
+                except Exception as e:
+                    print(f'[ERROR] {e}')
+                    use_previous_result = False
+                    self.close_connection()
+                    continue
                 # Flush the output to ensure it displays correctly
                 sys.stdout.flush()
 
@@ -511,3 +528,8 @@ class ICSServoController:
         for i in lst:
             sum_val = (sum_val << 4) + (v[i - 1] & 0x0F)
         return sum_val
+
+
+if __name__ == '__main__':
+    servo_controller = ICSServoController()
+    servo_controller.open_connection()

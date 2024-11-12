@@ -26,7 +26,7 @@ def parse_args():
     """Parse command-line arguments."""
     parser = argparse.ArgumentParser(description="ICS Servo Controller CLI Tool")
     parser.add_argument(
-        "--yaml_path",
+        "--yaml-path",
         default=None,
         help="Path to YAML configuration file for servo settings"
     )
