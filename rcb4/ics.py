@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 
 from colorama import Fore
@@ -7,6 +8,36 @@ import readchar
 import serial
 import serial.tools.list_ports
 import yaml
+
+
+class KeyListener(threading.Thread):
+    def __init__(self):
+        super().__init__()
+        self.key = None
+        self.lock = threading.Lock()
+        self.running = True  # Add a running flag
+
+    def run(self):
+        """Continuously read keys and store the latest key in self.key while running is True."""
+        while self.running:
+            try:
+                key = readchar.readkey()
+            except KeyboardInterrupt:
+                self.stop()
+                break
+            with self.lock:
+                self.key = key
+
+    def get_key(self):
+        """Return the latest key and reset it."""
+        with self.lock:
+            key = self.key
+            self.key = None
+        return key
+
+    def stop(self):
+        """Stop the listener thread."""
+        self.running = False
 
 
 def load_and_process_yaml(yaml_path):
@@ -294,10 +325,14 @@ class ICSServoController:
             "Free",
         ]
         selectable_options = ["Current Servo ID", "Angle"]
+
+        key_listener = KeyListener()
+        key_listener.daemon = True
+        key_listener.start()
         try:
             use_previous_result = False
             previous_servo_id = None
-            while True:
+            while key_listener.running:
                 if not self.ics or not self.ics.is_open:
                     # Clear the previous output at the start of each loop
                     sys.stdout.write("\033[H\033[J")
@@ -325,42 +360,40 @@ class ICSServoController:
                     if ret is False:
                         time.sleep(1.0)
                         continue
-                sys.stdout.write("\033[H\033[J")
-                sys.stdout.flush()
-
                 # Print servo status
                 try:
                     servo_id = self.get_servo_id()
                     if servo_id != previous_servo_id:
                         use_previous_result = False
                     previous_servo_id = servo_id
-                    print("--- Servo Status ---")
                     if use_previous_result is False:
                         _, result = self.read_param()
-                    for i, option in enumerate(options):
-                        if i == self.selected_index:
-                            print(
-                                f">> {option}: {self.get_status(option, result, selected=True)}"
-                            )
-                        else:
-                            print(f"   {option}: {self.get_status(option, result, selected=False)}")
+                        print('======================================')
+                        sys.stdout.write("\033[H\033[J")
+                        sys.stdout.flush()
+                        print("--- Servo Status ---")
+                        for i, option in enumerate(options):
+                            if i == self.selected_index:
+                                print(
+                                    f">> {option}: {self.get_status(option, result, selected=True)}"
+                                )
+                            else:
+                                print(f"   {option}: {self.get_status(option, result, selected=False)}")
 
-                    print("----------------------\n")
-                    print(
-                        "Use ↑↓ to navigate, ←→ to adjust Current Servo ID or Servo Angles"
-                    )
-                    print(f"Press 'Enter' when Current Servo ID is selected to save the currently highlighted ID in {Fore.GREEN}green{Style.RESET_ALL}.")
-                    print("Press 'z' to reset servo position")
-                    print(
-                        "Press 'r' to toggle rotation mode (enables continuous wheel-like rotation)"
-                    )
-                    print("Press 'f' to set free mode\n")
-                    print("'q' to quit.")
+                        print("----------------------\n")
+                        print(
+                            "Use ↑↓ to navigate, ←→ to adjust Current Servo ID or Servo Angles"
+                        )
+                        print(f"Press 'Enter' when Current Servo ID is selected to save the currently highlighted ID in {Fore.GREEN}green{Style.RESET_ALL}.")
+                        print("Press 'z' to reset servo position")
+                        print(
+                            "Press 'r' to toggle rotation mode (enables continuous wheel-like rotation)"
+                        )
+                        print("Press 'f' to set free mode\n")
+                        print("'q' to quit.")
 
+                    key = key_listener.get_key()
                     use_previous_result = False
-
-                    # Get key input without Enter
-                    key = readchar.readkey()
 
                     # Perform actions based on key
                     if key == "z":
@@ -376,12 +409,10 @@ class ICSServoController:
                         self.selected_index = (self.selected_index - 1) % len(
                             selectable_options
                         )
-                        use_previous_result = True
                     elif key == readchar.key.DOWN:
                         self.selected_index = (self.selected_index + 1) % len(
                             selectable_options
                         )
-                        use_previous_result = True
                     elif (
                         key == readchar.key.ENTER
                         and selectable_options[self.selected_index] == "Current Servo ID"
@@ -395,7 +426,6 @@ class ICSServoController:
                         key == readchar.key.LEFT
                         and selectable_options[self.selected_index] == "Current Servo ID"
                     ):
-                        use_previous_result = True
                         if self.servo_id_index == 0:
                             self.servo_id_index = len(self.servo_candidates) - 1
                         else:
@@ -405,7 +435,6 @@ class ICSServoController:
                         key == readchar.key.RIGHT
                         and selectable_options[self.selected_index] == "Current Servo ID"
                     ):
-                        use_previous_result = True
                         if self.servo_id_index == len(self.servo_candidates) - 1:
                             self.servo_id_index = 0
                         else:
@@ -423,6 +452,8 @@ class ICSServoController:
                         and selectable_options[self.selected_index] == "Angle"
                     ):
                         self.increase_angle()
+                    else:
+                        use_previous_result = True
                 except Exception as e:
                     print(f'[ERROR] {e}')
                     use_previous_result = False
@@ -436,6 +467,7 @@ class ICSServoController:
 
         except KeyboardInterrupt:
             print("\nDisplay stopped by user.")
+        key_listener.stop()
 
     def get_status(self, option, param=None, selected=False):
         """Return the status based on the selected option."""
