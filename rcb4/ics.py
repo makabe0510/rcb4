@@ -279,7 +279,7 @@ class ICSServoController:
 
     def display_status(self):
         options = [
-            "Servo ID",
+            "Current Servo ID",
             "Angle",
             "Baud Rate",
             "Rotation Mode",
@@ -288,7 +288,7 @@ class ICSServoController:
             "Serial Mode",
             "Free",
         ]
-        selectable_options = ["Servo ID", "Angle"]
+        selectable_options = ["Current Servo ID", "Angle"]
         try:
             use_previous_result = False
             while True:
@@ -329,19 +329,21 @@ class ICSServoController:
                 for i, option in enumerate(options):
                     if i == self.selected_index:
                         print(
-                            f"{Fore.YELLOW}>> {option}: {self.get_status(option, result)}{Style.RESET_ALL}"
+                            f">> {option}: {self.get_status(option, result, selected=True)}"
                         )
                     else:
-                        print(f"   {option}: {self.get_status(option, result)}")
+                        print(f"   {option}: {self.get_status(option, result, selected=False)}")
                 print("----------------------\n")
                 print(
-                    "Use ↑↓ to navigate, ←→ to adjust Servo ID or Servo Angles, 'q' to quit."
+                    "Use ↑↓ to navigate, ←→ to adjust Current Servo ID or Servo Angles"
                 )
+                print(f"Press 'Enter' when Current Servo ID is selected to save the currently highlighted ID in {Fore.GREEN}green{Style.RESET_ALL}.")
                 print("Press 'z' to reset servo position")
                 print(
                     "Press 'r' to toggle rotation mode (enables continuous wheel-like rotation)"
                 )
                 print("Press 'f' to set free mode\n")
+                print("'q' to quit.")
 
                 use_previous_result = False
 
@@ -370,7 +372,7 @@ class ICSServoController:
                     use_previous_result = True
                 elif (
                     key == readchar.key.ENTER
-                    and selectable_options[self.selected_index] == "Servo ID"
+                    and selectable_options[self.selected_index] == "Current Servo ID"
                 ):
                     self.set_servo_id(self.servo_id)
                     time.sleep(0.3)
@@ -379,7 +381,7 @@ class ICSServoController:
                         time.sleep(0.3)
                 elif (
                     key == readchar.key.LEFT
-                    and selectable_options[self.selected_index] == "Servo ID"
+                    and selectable_options[self.selected_index] == "Current Servo ID"
                 ):
                     use_previous_result = True
                     if self.servo_id_index == 0:
@@ -389,7 +391,7 @@ class ICSServoController:
                     self.servo_id = self.servo_candidates[self.servo_id_index]
                 elif (
                     key == readchar.key.RIGHT
-                    and selectable_options[self.selected_index] == "Servo ID"
+                    and selectable_options[self.selected_index] == "Current Servo ID"
                 ):
                     use_previous_result = True
                     if self.servo_id_index == len(self.servo_candidates) - 1:
@@ -418,22 +420,25 @@ class ICSServoController:
         except KeyboardInterrupt:
             print("\nDisplay stopped by user.")
 
-    def get_status(self, option, param=None):
+    def get_status(self, option, param=None, selected=False):
         """Return the status based on the selected option."""
-        if option == "Servo ID":
+        if option == "Current Servo ID":
             if param is not None:
                 current_servo_id = param["servo-id"]
             else:
                 current_servo_id = self.get_servo_id()
 
-            str = f"{Style.RESET_ALL}["
-            for i, servo_id in enumerate(self.servo_candidates):
-                if i == self.servo_id_index:
-                    str += f"{Fore.GREEN}{servo_id}{Style.RESET_ALL} "
-                else:
-                    str += f"{servo_id} "
-            str += "]"
-            return f"{current_servo_id} -> {str}"
+            s = f'{current_servo_id}'
+            if selected:
+                str = f"{Style.RESET_ALL}["
+                for i, servo_id in enumerate(self.servo_candidates):
+                    if i == self.servo_id_index:
+                        str += f"{Fore.GREEN}{servo_id}{Style.RESET_ALL} "
+                    else:
+                        str += f"{servo_id} "
+                str += "]"
+                s += f' -> Next Servo ID: {str}'
+            return s
         elif option == "Angle":
             return f"{self.read_angle()}"
         elif option == "Baud Rate":
