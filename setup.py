@@ -59,6 +59,7 @@ setup(
         "console_scripts": [
             "rcb4-write-firmware=rcb4.apps.write_firmware:main",
             "armh7-tools=rcb4.apps.armh7_tool:main",
+            "ics-manager=rcb4.apps.ics_manager:main",
         ],
     },
 )
