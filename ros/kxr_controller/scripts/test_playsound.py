@@ -21,7 +21,7 @@ if __name__ == "__main__":
     rospy.init_node('wav_player', anonymous=True)
 
     # 再生したいWAVファイルのパスを指定してください
-    file_path = "/home/leus/ros/catkin_ws/src/rcb4/ros/kxr_controller/resource/ask_balloon.wav"
+    file_path = "/home/leus/ros/catkin_ws/src/rcb4/ros/kxr_controller/resources/ask_balloon.wav"
     
     # WAVファイルを再生
     play_wav_file(file_path)

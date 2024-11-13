@@ -35,7 +35,7 @@ from pathlib import Path
 
 
 # 音声ファイルのパス（ROSパッケージパスを使用）
-sound_file_path = 'package://kxr_controller/resource/ask_balloon.wav'
+sound_file_path = 'package://kxr_controller/resources/ask_balloon.wav'
 
 def play_audio(msg):
     rospy.loginfo("[play_audio]: msg.data={}".format(msg.data))

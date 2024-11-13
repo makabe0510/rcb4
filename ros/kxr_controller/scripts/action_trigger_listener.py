@@ -23,7 +23,7 @@ def perform_action(neck_motion_message, eyebrow_status_message, sound_path):
 # コールバック関数
 def action_callback(msg):
     if msg.data == "ask_balloon":
-        perform_action("disagree", "angry", 'package://kxr_controller/resource/ask_balloon.wav')
+        perform_action("disagree", "angry", 'package://kxr_controller/resources/ask_balloon.wav')
 
 def main():
     rospy.init_node('action_listener')
