@@ -19,7 +19,9 @@ download_urdf_mesh_files(namespace)
 robot_model = RobotModel()
 robot_model.load_urdf_from_robot_description(
     namespace + '/robot_description_viz')
-ri = KXRROSRobotInterface(robot_model, namespace=namespace, controller_timeout=60.0)
+rospy.loginfo("Init Real Robot Interface")
+ri = KXRROSRobotInterface(robot_model, namespace=None, controller_timeout=60.0)
+rospy.loginfo("Init Real Robot Interface Done")
 
 # サーボをONにし、init_pose
 ri.servo_on()

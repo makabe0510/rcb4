@@ -37,6 +37,7 @@ from pathlib import Path
 sound_file_path = 'package://kxr_controller/resource/ask_balloon.wav'
 
 def play_audio(msg):
+    rospy.loginfo("[play_audio]: msg.data={}".format(msg.data))
     if msg.data == "ask_balloon":
         try:
             # 音声ファイルを再生
