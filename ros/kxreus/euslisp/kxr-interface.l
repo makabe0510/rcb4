@@ -45,7 +45,7 @@
 (defclass kxr-interface
   ;; :super robot-interface
   :super robot-move-base-interface
-  :slots (joint-names servo-on-off-client controller-name control-pressure))
+  :slots (joint-names servo-on-off-client controller-name control-pressure use-sim-time))
 
 
 (defmethod kxr-interface
@@ -72,28 +72,32 @@
                 :cmd-vel-topic "/diff_drive_controller/cmd_vel"
                 args)
 
-   (setq servo-on-off-client (instance ros::simple-action-client :init
-                                       (if namespace (format nil "/~A/~A/servo_on_off_real_interface" namespace controller-name)
-                                           (format nil "/~A/servo_on_off_real_interface" controller-name))
-                                       kxr_controller::ServoOnOffAction
+    (let (actions)
+      (setq use-sim-time (and (ros::has-param "/use_sim_time") (ros::get-param "/use_sim_time")))
+      (when (not use-sim-time)
+        (setq servo-on-off-client (instance ros::simple-action-client :init
+                                            (if namespace (format nil "/~A/~A/servo_on_off_real_interface" namespace controller-name)
+                                                (format nil "/~A/servo_on_off_real_interface" controller-name))
+                                            kxr_controller::ServoOnOffAction
+                                            :groupname groupname))
+        (setq stretch-client (instance ros::simple-action-client :init
+                                       (if namespace (format nil "/~A/~A/stretch_interface" namespace controller-name)
+                                           (format nil "/~A/stretch_interface" controller-name))
+                                       kxr_controller::StretchAction
                                        :groupname groupname))
-   (setq stretch-client (instance ros::simple-action-client :init
-                                  (if namespace (format nil "/~A/~A/stretch_interface" namespace controller-name)
-                                    (format nil "/~A/stretch_interface" controller-name))
-                                  kxr_controller::StretchAction
-                                  :groupname groupname))
-   (when control-pressure
-     (setq pressure-control-client (instance ros::simple-action-client :init
-                                             (if namespace (format nil "/~A/~A/pressure_control_interface" namespace controller-name)
-                                               (format nil "/~A/pressure_control_interface" controller-name))
-                                             kxr_controller::PressureControlAction
-                                             :groupname groupname)))
-   (dolist (action (if control-pressure (list servo-on-off-client stretch-client pressure-control-client)
-                     (list servo-on-off-client stretch-client)))
-     (unless (and joint-action-enable (send action :wait-for-server 3))
-       (setq joint-action-enable nil)
-       (ros::ros-warn "~A is not respond, kxr-interface is disabled" action)
-       (return)))
+        (setq actions (list servo-on-off-client stretch-client))
+        (when control-pressure
+          (setq pressure-control-client (instance ros::simple-action-client :init
+                                                  (if namespace (format nil "/~A/~A/pressure_control_interface" namespace controller-name)
+                                                      (format nil "/~A/pressure_control_interface" controller-name))
+                                                  kxr_controller::PressureControlAction
+                                                  :groupname groupname))
+          (setq actions (list servo-on-off-client stretch-client pressure-control-client))))
+      (dolist (action actions)
+        (unless (and joint-action-enable (send action :wait-for-server 3))
+          (setq joint-action-enable nil)
+          (ros::ros-warn "~A is not respond, kxr-interface is disabled" action)
+          (return))))
    t)
   (:default-controller
    ()
@@ -108,6 +112,8 @@
      (cons :joint-names joint-names))))
   (:servo-on
    (&key (names nil))
+   (when use-sim-time
+     (return-from :servo-on t))
    (unless joint-action-enable
      (if viewer (send self :draw-objects))
      (return-from :servo-on t))
@@ -120,6 +126,8 @@
      (send servo-on-off-client :send-goal goal)))
   (:servo-off
    (&key (names nil))
+   (when use-sim-time
+     (return-from :servo-on t))
    (unless joint-action-enable
      (if viewer (send self :draw-objects))
      (return-from :servo-off t))
@@ -132,6 +140,8 @@
      (send servo-on-off-client :send-goal goal)))
   (:send-stretch
    (&key (value 127) (names nil))
+   (when use-sim-time
+     (return-from :servo-on t))
    (when (null names)
      (setq names joint-names))
    (let* (goal result)
@@ -141,12 +151,16 @@
      (send stretch-client :send-goal goal)))
   (:read-stretch
    ()
+   (when use-sim-time
+     (return-from :servo-on t))
    (one-shot-subscribe
     (if namespace (format nil "/~A/~A/stretch" namespace controller-name)
       (format nil "/~A/stretch" controller-name))
     kxr_controller::Stretch))
   (:send-pressure-control
    (&key board-idx start-pressure stop-pressure release)
+   (when use-sim-time
+     (return-from :servo-on t))
    (let* (goal result)
      (setq goal (instance kxr_controller::PressureControlGoal :init))
      (send goal :board_idx board-idx)
@@ -156,6 +170,8 @@
      (send pressure-control-client :send-goal goal)))
   (:read-pressure
    (&key board-idx)
+   (when use-sim-time
+     (return-from :servo-on t))
    (one-shot-subscribe
     (if namespace (format nil "/~A/~A/pressure/~A" namespace controller-name board-idx)
       (format nil "/~A/pressure/~A" controller-name board-idx))
