@@ -22,6 +22,10 @@ class KeyListener(threading.Thread):
         while self.running:
             try:
                 key = readchar.readkey()
+                if key == 'q':
+                    with self.lock:
+                        self.key = key
+                    break
             except KeyboardInterrupt:
                 self.stop()
                 break
