@@ -34,36 +34,36 @@ rospy.loginfo('init_pose')
 # nod動作
 def nod(send_time=1):
     ri.angle_vector(robot_model.init_pose())
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_p.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(0))
+    robot_model.head_neck_p.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()    
 
 # disagree動作
 def disagree(send_time=1):
     ri.angle_vector(robot_model.init_pose())
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(-30))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(-30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(0))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()    
 
 # tilt動作
 def tilt(send_time=1):
     ri.angle_vector(robot_model.init_pose())
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_r.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(0))
+    robot_model.head_neck_r.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     ri.wait_interpolation()    
 
