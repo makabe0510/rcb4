@@ -11,7 +11,7 @@ from kxr_models.download_urdf import download_urdf_mesh_files
 import rospy
 from skrobot.model import RobotModel
 
-#rospy.init_node('kxr_interface', anonymous=True)
+rospy.init_node('kxr_interface', anonymous=True)
 
 namespace = ''
 download_urdf_mesh_files(namespace)

@@ -28,8 +28,8 @@
         type="emotion_to_joint_publisher.py" />
 
   <!-- action_trigger_listener から/neck_motion を受け取り首を動かす -->
-  <node name="neck_command_listener_independent"
+  <node name="pooh_kxr_command_listener"
         pkg="kxr_controller"
-        type="neck_command_listener_independent.py" />
+        type="pooh_kxr_command_listener.py" />
 
 </launch>
