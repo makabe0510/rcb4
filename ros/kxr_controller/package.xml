@@ -36,12 +36,15 @@
   <exec_depend>cmake_modules</exec_depend>
   <exec_depend>kxr_models</exec_depend>
   <exec_depend>rviz</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
 
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>jsk_tools</test_depend>
 
   <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
     <pip_requirements>requirements.txt</pip_requirements>
   </export>
 
