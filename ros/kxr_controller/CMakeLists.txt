@@ -76,6 +76,7 @@ add_message_files(
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/KXRParameteres.cfg
+  cfg/PoohScenario.cfg
 )
 
 generate_messages(
@@ -114,12 +115,20 @@ catkin_install_python(
   PROGRAMS ${PYTHON_SCRIPT_FILES}
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
-install(FILES requirements.txt
+install(FILES requirements.txt plugin.xml
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 install(TARGETS kxr_controller
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY resource
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(DIRECTORY config
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
 foreach(dir launch)
