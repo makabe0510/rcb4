@@ -5,6 +5,8 @@ import rospy
 from std_msgs.msg import UInt16, String
 from ros_speak import play_sound
 from pathlib import Path  # pathlibをインポート
+from dynamic_reconfigure.server import Server
+from kxr_controller.cfg import PoohScenarioConfig
 
 # 動作を実行する関数
 def perform_action(neck_motion_message, eyebrow_status_message, sound_path):
@@ -36,13 +38,22 @@ def action_callback(msg):
     else:
         rospy.loginfo("No action defined for story={}, section={}, trigger={}".format(story, section, trigger))
 
+# story とsection を設定
+def reconfigure_callback(config, level):
+    global story, section
+    story = config.story
+    section = config.section
+    rospy.loginfo("Set story:{}, section:{}".format(story, section))
+    return config
+
+
 def main():
     global story, section
     rospy.init_node('action_listener')
 
-    # 初期値を設定
-    story = rospy.get_param('/story', 1)
-    section = rospy.get_param('/section', 1)
+    # dynamic reconfigure の設定
+    reconfigure_server = Server(PoohScenarioConfig,
+                                reconfigure_callback)
 
     # パブリッシャーの設定
     global neck_motion_pub, eyebrow_status_pub
@@ -54,13 +65,7 @@ def main():
 
     rospy.loginfo("Action listener node started, waiting for messages...")
 
-    # 外部からパラメータを変更可能にするループ
-    rate = rospy.Rate(1)  # 1Hz
-    while not rospy.is_shutdown():
-        story = rospy.get_param('/story', story)
-        section = rospy.get_param('/section', section)
-        rospy.loginfo("Current story={}, section={}".format(story, section))
-        rate.sleep()
+    rospy.spin()
 
 if __name__ == "__main__":
     try:

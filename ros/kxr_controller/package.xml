@@ -39,12 +39,15 @@
   <exec_depend>riberry_startup</exec_depend>
   <exec_depend>pooh_kxr_fullbody</exec_depend>
   <exec_depend>eyebrow_control_pkg</exec_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
 
   <test_depend>roslaunch</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>jsk_tools</test_depend>
 
   <export>
+    <rqt_gui plugin="${prefix}/plugin.xml"/>
     <pip_requirements>requirements.txt</pip_requirements>
   </export>
 
