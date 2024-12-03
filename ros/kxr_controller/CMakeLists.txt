@@ -76,6 +76,7 @@ add_message_files(
 # generate the dynamic_reconfigure config file
 generate_dynamic_reconfigure_options(
   cfg/KXRParameteres.cfg
+  cfg/PoohScenario.cfg
 )
 
 generate_messages(
