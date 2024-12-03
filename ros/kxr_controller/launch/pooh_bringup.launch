@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <!-- 音声再生のために必要 -->
+  <include file="$(find riberry_startup)/launch/sound_play.launch" />
+
+  <!-- 体のサーボ用の基板との通信とかに必要 -->
+  <include file="$(find pooh_kxr_fullbody)/launch/pooh_controller.launch" />
+
+  <!-- story（どのストーリーか), section（何番目の話者か), trigger(何番目のセリフか)に応じて音声・眉(/eyebrow_status)・体（今は首だけ, /neck_motion）の動きを出す -->
+  <node name="action_trigger_listener_number"
+        pkg="kxr_controller"
+        type="action_trigger_listener_number.py" />
+
+  <!-- action_trigger_listener から/eyebrow_status を受け取り眉を動かす -->
+  <node name="emotion_to_joint_publisher"
+        pkg="eyebrow_control_pkg"
+        type="emotion_to_joint_publisher.py" />
+
+  <!-- action_trigger_listener から/neck_motion を受け取り首を動かす -->
+  <node name="neck_command_listener_independent"
+        pkg="kxr_controller"
+        type="neck_command_listener_independent.py" />
+
+</launch>
