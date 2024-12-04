@@ -10,6 +10,7 @@
   <node name="joint_state_to_i2c"
         pkg="kxr_controller"
         type="i2c_joint_control.py" />
+
   <node name="$(anon controller_spawner)"
         pkg="controller_manager" type="spawner"
         respawn="true" respawn_delay="5"
