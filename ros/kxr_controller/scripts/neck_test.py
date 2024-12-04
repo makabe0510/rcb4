@@ -6,7 +6,7 @@ import time
 import argparse
 import numpy as np
 import IPython
-from kxr_controller.kxr_interface import KXRROSRobotInterface
+from kxr_controller.pooh_interface import PoohROSRobotInterface
 from kxr_models.download_urdf import download_urdf_mesh_files
 import rospy
 from skrobot.model import RobotModel
@@ -19,35 +19,35 @@ download_urdf_mesh_files(namespace)
 robot_model = RobotModel()
 robot_model.load_urdf_from_robot_description(
     namespace + '/robot_description_viz')
-ri = KXRROSRobotInterface(  # NOQA
+ri = PoohROSRobotInterface(  # NOQA
     robot_model, namespace=namespace, controller_timeout=60.0)
 
 #define nod, disagree, tilt and then define test
 def nod(send_time = 1):
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_p.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     time.sleep(1)
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(0))
+    robot_model.head_neck_p.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)
 
 def disagree(send_time = 1):
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))                                          
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)                                          
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(-30))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(-30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(0))                                            
+    robot_model.head_neck_y.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)  
 
 def tilt(send_time = 1):
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(30))                                          
+    robot_model.head_neck_r.joint_angle(np.deg2rad(30))
     ri.angle_vector(robot_model.angle_vector(), send_time)
     time.sleep(2)                                                                                   
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(0))                                           
+    robot_model.head_neck_r.joint_angle(np.deg2rad(0))
     ri.angle_vector(robot_model.angle_vector(), send_time)  
     
     
