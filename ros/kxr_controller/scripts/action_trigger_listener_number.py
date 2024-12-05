@@ -30,11 +30,13 @@ def action_callback(msg):
     trigger = msg.data  # UInt16の値を取得
     rospy.loginfo("Received trigger: {}".format(trigger))
 
+    sound_data = "package://kxr_controller/resources/pooh_voice/wav/{}_{}_{}".format(story, section, trigger)
+
     # 条件に基づく動作
     if story == 1 and section == 1 and trigger == 1:
-        perform_action("disagree", "angry", 'package://kxr_controller/resources/ask_balloon.wav')
+        perform_action("disagree", "angry", sound_data)
     elif story == 2 and section == 3 and trigger == 4:
-        perform_action("tilt", "sad", 'package://kxr_controller/resources/ask_balloon.wav')
+        perform_action("tilt", "sad", sound_data)
     else:
         rospy.loginfo("No action defined for story={}, section={}, trigger={}".format(story, section, trigger))
 
