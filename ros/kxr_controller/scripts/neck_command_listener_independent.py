@@ -5,7 +5,7 @@ from __future__ import print_function
 import time
 import rospy
 from std_msgs.msg import String
-from kxr_controller.kxr_interface import KXRROSRobotInterface
+from kxr_controller.pooh_interface import PoohROSRobotInterface
 from kxr_models.download_urdf import download_urdf_mesh_files
 from skrobot.model import RobotModel
 import numpy as np
@@ -20,7 +20,7 @@ robot_model = RobotModel()
 robot_model.load_urdf_from_robot_description(
     namespace + '/robot_description_viz')
 rospy.loginfo("Init Real Robot Interface")
-ri = KXRROSRobotInterface(robot_model, namespace=None, controller_timeout=60.0)
+ri = PoohROSRobotInterface(robot_model, namespace=None, controller_timeout=60.0)
 rospy.loginfo("Init Real Robot Interface Done")
 
 # サーボをONにし、init_pose
