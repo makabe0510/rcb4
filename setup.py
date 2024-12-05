@@ -6,7 +6,7 @@ import sys
 from setuptools import find_packages
 from setuptools import setup
 
-version = "0.0.3"
+version = "0.0.7"
 
 
 if sys.argv[-1] == "release":
@@ -59,6 +59,7 @@ setup(
         "console_scripts": [
             "rcb4-write-firmware=rcb4.apps.write_firmware:main",
             "armh7-tools=rcb4.apps.armh7_tool:main",
+            "ics-manager=rcb4.apps.ics_manager:main",
         ],
     },
 )

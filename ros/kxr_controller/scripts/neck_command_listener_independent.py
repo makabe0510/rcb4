@@ -5,7 +5,7 @@ from __future__ import print_function
 import time
 import rospy
 from std_msgs.msg import String
-from kxr_controller.kxr_interface import KXRROSRobotInterface
+from kxr_controller.pooh_interface import PoohROSRobotInterface
 from kxr_models.download_urdf import download_urdf_mesh_files
 from skrobot.model import RobotModel
 import numpy as np
@@ -20,7 +20,7 @@ robot_model = RobotModel()
 robot_model.load_urdf_from_robot_description(
     namespace + '/robot_description_viz')
 rospy.loginfo("Init Real Robot Interface")
-ri = KXRROSRobotInterface(robot_model, namespace=None, controller_timeout=60.0)
+ri = PoohROSRobotInterface(robot_model, namespace=None, controller_timeout=60.0)
 rospy.loginfo("Init Real Robot Interface Done")
 
 # サーボをONにし、init_pose
@@ -33,38 +33,51 @@ rospy.loginfo('init_pose')
 
 # nod動作
 def nod(send_time=1):
-    ri.angle_vector(robot_model.init_pose())
+    controller_type = 'head_controller'
+    ri.angle_vector(robot_model.init_pose(),
+                    controller_type=controller_type)
     robot_model.head_neck_p.joint_angle(np.deg2rad(30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()
     robot_model.head_neck_p.joint_angle(np.deg2rad(0))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()    
 
 # disagree動作
 def disagree(send_time=1):
-    ri.angle_vector(robot_model.init_pose())
+    controller_type = 'head_controller'
+    ri.angle_vector(robot_model.init_pose(),
+                    controller_type=controller_type)
     robot_model.head_neck_y.joint_angle(np.deg2rad(30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()
     robot_model.head_neck_y.joint_angle(np.deg2rad(-30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()
     #robot_model.head_neck_y.joint_angle(np.deg2rad(30))
     #ri.angle_vector(robot_model.angle_vector(), send_time)
     #ri.wait_interpolation()
     robot_model.head_neck_y.joint_angle(np.deg2rad(0))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()    
 
 # tilt動作
 def tilt(send_time=1):
-    ri.angle_vector(robot_model.init_pose())
+    controller_type = 'head_controller'
+    ri.angle_vector(robot_model.init_pose(),
+                    controller_type=controller_type)
     robot_model.head_neck_r.joint_angle(np.deg2rad(30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()
     robot_model.head_neck_r.joint_angle(np.deg2rad(0))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     ri.wait_interpolation()    
 
 # コールバック関数

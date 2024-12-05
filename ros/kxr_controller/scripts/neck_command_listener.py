@@ -5,7 +5,7 @@ from __future__ import print_function
 import time
 import numpy as np
 import rospy
-from kxr_controller.kxr_interface import KXRROSRobotInterface
+from kxr_controller.pooh_interface import PoohROSRobotInterface
 from kxr_models.download_urdf import download_urdf_mesh_files
 from skrobot.model import RobotModel
 from std_msgs.msg import String  # メッセージはString型と仮定
@@ -18,36 +18,47 @@ robot_model = RobotModel()
 robot_model.load_urdf_from_robot_description(
     namespace + '/robot_description_viz')
 
-ri = KXRROSRobotInterface(  # NOQA
+ri = PoohROSRobotInterface(  # NOQA
     robot_model, namespace=namespace, controller_timeout=60.0)
 
 # 動作の定義
 def nod(send_time=1):
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    controller_type = 'head_controller'
+    robot_model.head_neck_p.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     time.sleep(1)
-    robot_model.head_neck_pitch.joint_angle(np.deg2rad(0))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    robot_model.head_neck_p.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
 
 def disagree(send_time=1):
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))                                          
-    ri.angle_vector(robot_model.angle_vector(), send_time)                                          
+    controller_type = 'head_controller'
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(-30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    robot_model.head_neck_y.joint_angle(np.deg2rad(-30))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(30))
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    robot_model.head_neck_y.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     time.sleep(1)                                                                                   
-    robot_model.head_neck_yaw.joint_angle(np.deg2rad(0))                                            
-    ri.angle_vector(robot_model.angle_vector(), send_time)  
+    robot_model.head_neck_y.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
 
 def tilt(send_time=1):
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(30))                                          
-    ri.angle_vector(robot_model.angle_vector(), send_time)
+    controller_type = 'head_controller'
+    robot_model.head_neck_r.joint_angle(np.deg2rad(30))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
     time.sleep(2)                                                                                   
-    robot_model.head_neck_roll.joint_angle(np.deg2rad(0))                                           
-    ri.angle_vector(robot_model.angle_vector(), send_time)  
+    robot_model.head_neck_r.joint_angle(np.deg2rad(0))
+    ri.angle_vector(robot_model.angle_vector(), send_time,
+                    controller_type=controller_type)
 
 # コールバック関数: /neck_motionのメッセージを受け取り対応する動作を実行
 def neck_motion_callback(msg):
