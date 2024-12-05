@@ -31,7 +31,7 @@ def joint_state_callback(msg):
 
 def main():
     rospy.init_node('joint_state_to_i2c', anonymous=True)
-    rospy.Subscriber("joint_states", JointState, joint_state_callback)
+    rospy.Subscriber("eye_brow/joint_states", JointState, joint_state_callback)
     rospy.loginfo("Started JointState to I2C bridge")
     rospy.spin()
 
