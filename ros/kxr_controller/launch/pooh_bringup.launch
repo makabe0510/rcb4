@@ -6,11 +6,10 @@
   <!-- 体のサーボ用の基板との通信とかに必要 -->
   <include file="$(find pooh_kxr_fullbody)/launch/pooh_controller.launch" />
 
-  <!-- i2cでarduino naano everyと通信 -->
-  <node name="joint_state_to_i2c"
+  <!-- serialでarduino nano everyと通信 -->
+  <node name="joint_state_to_arduino"
         pkg="kxr_controller"
-        type="i2c_joint_control.py" />
-
+        type="serial_joint_control.py" />
   <node name="$(anon controller_spawner)"
         pkg="controller_manager" type="spawner"
         respawn="true" respawn_delay="5"
