@@ -41,8 +41,8 @@ class PoohROSRobotInterface(KXRROSRobotInterface):
     def head_controller(self):
         return dict(
             controller_type='head_controller',
-            controller_action='head_traj_controller/follow_joint_trajectory',
-            controller_state='head_traj_controller/state',
+            controller_action='head_controller/follow_joint_trajectory',
+            controller_state='head_controller/state',
             action_type=control_msgs.msg.FollowJointTrajectoryAction,
             joint_names=['head_neck_y', 'head_neck_p', 'head_neck_r'])
 
