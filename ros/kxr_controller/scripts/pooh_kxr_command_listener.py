@@ -174,8 +174,10 @@ def left_hand_point(send_time=1):
     controller_type = 'larm_controller'
     ri.angle_vector([ 1.7555017e-07,  1.7555017e-07,  2.3563702e-03, -1.3665912e-01,-5.5606174e-01,  1.9379719e-01,  6.6680324e-01,  1.1892895e+00,-3.0335987e-01], send_time, controller_type=controller_type)
     ri.wait_interpolation()
-    ri.angle_vector(robot_model.init_pose(), 2, controller_type='larm_controller')
+    ri.angle_vector(robot_model.init_pose(), send_time, controller_type='larm_controller')
     ri.wait_interpolation()
+
+# def 
 
 
 
@@ -196,23 +198,36 @@ def neck_motion_callback(msg):
     elif command == 'test':  # testメッセージに対応
         rospy.loginfo('Executing test motions')
         test()
+    elif command == '':
+        rospy.loginfo('no neck motion')
     else:
         rospy.logwarn(f'Unknown command received: {command}')
 
 def arm_motion_callback(msg):
     command = msg.data.lower()
-    if command == 'right':
-        rospy.loginfo('Executing nod motion')
-        nod()
-    elif command == 'disagree':
-        rospy.loginfo('Executing disagree motion')
-        disagree()
-    elif command == 'tilt':
-        rospy.loginfo('Executing tilt motion')
-        tilt()
-    elif command == 'test':  # testメッセージに対応                                              
-        rospy.loginfo('Executing test motions')
-        test()
+    if command == 'right_hand_up':
+        rospy.loginfo('Executing right_hand_up motion')
+        right_hand_up()
+    elif command == 'left_hand_chin':
+        rospy.loginfo('Executing left_hand_chin motion')
+        left_hand_chin()
+    elif command == 'right_hand_mouth':
+        rospy.loginfo('Executing right_hand_mouth motion')
+        right_hand_mouth()
+    elif command == 'banzai':  
+        rospy.loginfo('Executing banzai motions')
+        banzai()
+    elif command == 'onegai':
+        rospy.loginfo('Executing onegai motion')
+        onegai()
+    elif command == 'left_hand_point':
+        rospy.loginfo('Executing left_hand_point motion')
+        left_hand_point()
+    elif command == 'right_hand_bye':
+        rospy.loginfo('Executing right_hand_bye motion')
+        right_hand_bye()
+    elif command == '':
+        rospy.loginfo('no arm motion')
     else:
         rospy.logwarn(f'Unknown command received: {command}')
 
@@ -231,14 +246,15 @@ def test():
 def main():
     # /neck_motionトピックを購読し、neck_motion_callback関数をコールバックに指定
     rospy.Subscriber('/neck_motion', String, neck_motion_callback)
+    rospy.Subscriber('/arm_motion', String, arm_motion_callback)
 
-]    rospy.spin()
+    rospy.spin()
 
 if __name__ == '__main__':
     try:
         main()
     except rospy.ROSInterruptException:
-        passFile to save in: ~/ros/kxr/src/rcb4/ros/kxr_controller/scripts/poo
+        pass
 
 
 
