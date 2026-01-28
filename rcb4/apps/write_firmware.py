@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 
+import rcb4.data
 from rcb4.data import kondoh7_elf
 from rcb4.data import stlink
 
