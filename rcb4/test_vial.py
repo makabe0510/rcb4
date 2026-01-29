@@ -296,7 +296,7 @@ def init_gripper(
     interface,
     servo_a_id: int = 5,
     servo_b_id: int = 7,
-    threshold: float = 0.5,
+    threshold: float = 3.0,
     open_close_cmd: float = 2.0,
     shrink_cmd: float = 40.0,
 ):
@@ -325,7 +325,11 @@ def init_gripper(
             servo_b_id=servo_b_id,
             threshold=threshold,
         )
-print("init_gripper()")
+print("left")
+print("init_gripper(interface, servo_a_id = 4, servo_b_id = 6, threshold = 3, shrink_cmd = 40)")
+
+print("right")
+print("init_gripper(interface, servo_a_id = 5, servo_b_id = 7, threshold = 3, shrink_cmd = 40)")
 
 def loose_gripper(
     interface,
@@ -356,7 +360,7 @@ def loose_gripper(
             servo_b_id=servo_b_id,
             threshold=threshold,
         )
-print("loose_gripper()")
+print("loose_gripper(interface, threshold = 3, extend_cmd = 40)")
 
 if __name__ == "__main__":
     interface = ARMH7Interface()
