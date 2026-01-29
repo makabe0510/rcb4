@@ -23,9 +23,10 @@ def open_gripper_init():
     demo()
 
 def demo():
-    loosen_left_stopper()
-    insert_left_stopper()
+    loosen_left_stopper()    
     loosen_right_stopper()
+    
+    insert_left_stopper()
     insert_right_stopper()
 
 def hold_vial():
@@ -375,8 +376,8 @@ def loosen_left_stopper():
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=10.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=5.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([0], servo_ids=[3])
-    time.sleep(3)
+    interface.angle_vector([-120], servo_ids=[3])
+    time.sleep(5)
 
 def insert_left_stopper():
     print("insert stopper")
@@ -385,8 +386,8 @@ def insert_left_stopper():
     command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=-1.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([0], servo_ids=[3])
-    time.sleep(3)
+    interface.angle_vector([-120], servo_ids=[3])
+    time.sleep(5)
 
 def loosen_right_stopper():
     print("loosen stopper")
@@ -396,8 +397,8 @@ def loosen_right_stopper():
     command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=10.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=5.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
-    interface.angle_vector([0], servo_ids=[2])
-    time.sleep(3)
+    interface.angle_vector([-120], servo_ids=[2])
+    time.sleep(5)
 
 def insert_right_stopper():
     print("insert stopper")
@@ -406,8 +407,8 @@ def insert_right_stopper():
     command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
-    interface.angle_vector([0], servo_ids=[2])
-    time.sleep(3)
+    interface.angle_vector([-120], servo_ids=[2])
+    time.sleep(5)
 
 
 # def insert_stopper():
