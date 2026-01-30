@@ -15,9 +15,9 @@ def open_gripper_init():
     print("open gripper init")
     interface.hold()
     interface.angle_vector([90], servo_ids=[9])
-    # interface.angle_vector([-60, -60], servo_ids=[2, 3])
-    # time.sleep(5)
-    # interface.angle_vector([-30, -30], servo_ids=[0, 1])
+
+    release_vial()
+    
     init_left_gripper()
     # init_right_gripper()
     # demo()
@@ -34,9 +34,13 @@ def demo():
 
 def hold_vial():
     print("hold vial")
-    interface.angle_vector([10, 10], servo_ids=[0, 1])
-    time.sleep(5)
-    interface.angle_vector([0, 0], servo_ids=[0, 1])
+    command_single_dof_for_duration(interface, cmd = 20, duration_s=4.0, servo_id = 1)
+    # command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=4.0, servo_a_id = 0, servo_b_id = 1)
+
+def release_vial():
+    print("release vial")
+    command_two_dof_for_duration(interface, cmd_a = -20, cmd_b = -20, duration_s=3.0, servo_a_id = 0, servo_b_id = 1)
+    command_two_dof_for_duration(interface, cmd_a = 30, cmd_b = 30, duration_s=0.5, servo_a_id = 0, servo_b_id = 1)
 
 def loop_task():
     loosen_stopper()
@@ -119,6 +123,81 @@ def command_diff_drive_for_duration(
         _stop_two_servos(interface, servo_a_id, servo_b_id)
 
     return a_cmd, b_cmd
+
+def command_single_dof_for_duration(
+    interface,
+    cmd: float,
+    duration_s: float,
+    servo_id: int,
+    stop_after: bool = True,
+) -> float:
+    """
+    1自由度（単一サーボ）に指令を一定時間だけ与え、その後停止する。
+
+    Args:
+        interface : ARMH7Interface 等
+        cmd       : サーボ指令値（正 → 閉まる方向、負 → 開く方向）
+        duration_s: 指令を与える時間 [s]
+        servo_id  : 対象サーボID
+        stop_after: Trueなら duration_s 後に 0 指令を送る
+
+    Returns:
+        cmd : 実際に送った指令値
+    """
+    # 指令送信
+    interface.angle_vector([float(cmd)], servo_ids=[servo_id])
+
+    # 指定時間待つ（ブロッキング）
+    time.sleep(float(duration_s))
+
+    # 停止
+    if stop_after:
+        interface.angle_vector([0.0], servo_ids=[servo_id])
+
+    return float(cmd)
+
+def command_two_dof_for_duration(
+    interface,
+    cmd_a: float,
+    cmd_b: float,
+    duration_s: float,
+    servo_a_id: int,
+    servo_b_id: int,
+    stop_after: bool = True,
+) -> Tuple[float, float]:
+    """
+    差動ではない2自由度（2サーボ独立）で、
+    指令を一定時間だけ与え、その後停止する。
+
+    Args:
+        interface  : ARMH7Interface 等
+        cmd_a      : サーボA指令値（正 → 閉まる方向）
+        cmd_b      : サーボB指令値（正 → 閉まる方向）
+        duration_s : 指令を与える時間 [s]
+        servo_a_id : サーボA ID
+        servo_b_id : サーボB ID
+        stop_after : Trueなら duration_s 後に 0 指令を送る
+
+    Returns:
+        (cmd_a, cmd_b): 実際に送った指令値
+    """
+    # 2サーボに同時指令
+    interface.angle_vector(
+        [float(cmd_a), float(cmd_b)],
+        servo_ids=[servo_a_id, servo_b_id],
+    )
+
+    # 指定時間待つ（ブロッキング）
+    time.sleep(float(duration_s))
+
+    # 停止
+    if stop_after:
+        interface.angle_vector(
+            [0.0, 0.0],
+            servo_ids=[servo_a_id, servo_b_id],
+        )
+
+    return float(cmd_a), float(cmd_b)
 
 def _read_sum_current(interface, servo_a_id: int, servo_b_id: int, print_flag = False) -> float:
     currents = interface.read_servo_current()
