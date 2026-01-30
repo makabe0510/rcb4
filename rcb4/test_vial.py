@@ -14,20 +14,23 @@ def free_gripper(interface):
 def open_gripper_init():
     print("open gripper init")
     interface.hold()
-    interface.angle_vector([0], servo_ids=[9])
+    interface.angle_vector([90], servo_ids=[9])
     # interface.angle_vector([-60, -60], servo_ids=[2, 3])
     # time.sleep(5)
     # interface.angle_vector([-30, -30], servo_ids=[0, 1])
     init_left_gripper()
-    init_right_gripper()
-    demo()
+    # init_right_gripper()
+    # demo()
 
 def demo():
     loosen_left_stopper()    
-    loosen_right_stopper()
-    
+    # loosen_right_stopper()
+    interface.angle_vector([-90], servo_ids=[9])
+    time.sleep(5)
+    interface.angle_vector([90], servo_ids=[9])
+    time.sleep(5)
     insert_left_stopper()
-    insert_right_stopper()
+    # insert_right_stopper()
 
 def hold_vial():
     print("hold vial")
@@ -373,41 +376,75 @@ def loosen_left_stopper():
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([-90], servo_ids=[3])
     time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=10.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=5.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([-120], servo_ids=[3])
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 5, servo_b_id = 7)
+    interface.angle_vector([120], servo_ids=[3])
     time.sleep(5)
+
+def loosen_left_stopper2():
+    print("loosen stopper")
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
+    interface.angle_vector([-90], servo_ids=[3])
+    time.sleep(3)
+    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=3.0, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
+
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+
+    interface.angle_vector([120], servo_ids=[3])
+    time.sleep(3)
 
 def insert_left_stopper():
     print("insert stopper")
     interface.angle_vector([-90], servo_ids=[3])
     time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=7, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-1.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([-120], servo_ids=[3])
-    time.sleep(5)
+    command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=-20.0, duration_s=7, servo_a_id = 5, servo_b_id = 7)
+    interface.angle_vector([120], servo_ids=[3])
+    time.sleep(3)
+
+def insert_left_stopper2():
+    print("insert stopper")
+    interface.angle_vector([-90], servo_ids=[3])
+    time.sleep(3)
+    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=3, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=-20.0, duration_s=3, servo_a_id = 5, servo_b_id = 7)
+    interface.angle_vector([120], servo_ids=[3])
+    time.sleep(3)
 
 def loosen_right_stopper():
     print("loosen stopper")
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
     interface.angle_vector([-90], servo_ids=[2])
     time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=10.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=5.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
-    interface.angle_vector([-120], servo_ids=[2])
+    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
+    interface.angle_vector([120], servo_ids=[2])
     time.sleep(5)
 
 def insert_right_stopper():
     print("insert stopper")
     interface.angle_vector([-90], servo_ids=[2])
     time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=8.5, servo_a_id = 4, servo_b_id = 6)
-    interface.angle_vector([-120], servo_ids=[2])
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
+    interface.angle_vector([120], servo_ids=[2])
     time.sleep(5)
 
 
@@ -426,6 +463,13 @@ def insert_right_stopper():
 #     interface.angle_vector([0, 0], servo_ids=[5, 7])
 #     interface.angle_vector([120], servo_ids=[3])
 
+def left_loop_test():
+    try:
+        while True:
+            loosen_left_stopper2()
+            insert_left_stopper2()
+    except KeyboardInterrupt:
+        print("\nStopped by user")
 
 if __name__ == "__main__":
     interface = ARMH7Interface()
