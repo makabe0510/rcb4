@@ -2,7 +2,33 @@ from rcb4.armh7interface import ARMH7Interface
 import numpy as np
 import time
 from typing import Tuple
+from dataclasses import dataclass
+from typing import List, Dict, Sequence, Literal
 
+GripperStage = Literal["init", "loose"]
+
+@dataclass(frozen=True)
+class GripperConfig:
+    name: str
+    servo_a_id: int
+    servo_b_id: int
+
+    # --- init 用（open_then_shrink...） ---
+    init_threshold: float = 0.5
+    init_open_close_cmd: float = 2.0
+    init_shrink_cmd: float = 20.0
+    init_wait_s: float = 1.0
+
+    # --- loose 用（extend_until...） ---
+    loose_threshold: float = 0.5
+    loose_extend_cmd: float = 40.0
+
+    # extend_until_current_threshold_step が前動作/低電流安定版のとき用
+    loose_preclose_cmd: float = 2.0
+    loose_preclose_wait_s: float = 0.2
+    loose_low_hold_s: float = 0.3
+    loose_max_time: float | None = 5.0
+    
 def read_voltage_test(interface):
     val = interface.read_imu_data()
     print(val)
@@ -10,17 +36,6 @@ def read_voltage_test(interface):
 
 def free_gripper(interface):
     interface.angle_vector([0, 0], servo_ids=[5, 7])
-
-def open_gripper_init():
-    print("open gripper init")
-    interface.hold()
-    interface.angle_vector([90], servo_ids=[9])
-
-    release_vial()
-    
-    init_left_gripper()
-    # init_right_gripper()
-    # demo()
 
 def demo():
     loosen_left_stopper()    
@@ -360,8 +375,6 @@ def extend_until_current_threshold_step(
 
     return True
 
-print("open_then_shrink_until_current_threshold_step(interface, open_close_cmd=2.0, shrink_cmd=20.0, reset=True)")
-
 def init_gripper(
     interface,
     servo_a_id: int = 5,
@@ -395,11 +408,6 @@ def init_gripper(
             servo_b_id=servo_b_id,
             threshold=threshold,
         )
-print("left")
-print("init_gripper(interface, servo_a_id = 4, servo_b_id = 6, threshold = 2.0, shrink_cmd = 40)")
-
-print("right")
-print("init_gripper(interface, servo_a_id = 5, servo_b_id = 7, threshold = 2.0, shrink_cmd = 40)")
 
 def loose_gripper(
     interface,
@@ -430,18 +438,127 @@ def loose_gripper(
             servo_b_id=servo_b_id,
             threshold=threshold,
         )
-print("left")
-print("loose_gripper(interface, servo_a_id = 4, servo_b_id = 6, extend_cmd = 40)")
 
-print("right")
-print("loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)")
+def run_grippers_sequence_parallel(
+    interface,
+    grippers: List[GripperConfig],
+    stages: Sequence[GripperStage] = ("init", "loose"),
+) -> Dict[str, Dict[str, bool]]:
+    """
+    複数グリッパーに対して stages を順番に実行する（各stage内は同時進行）。
+    例: stages=("init","loose") なら
+        - 全グリッパーを同時に init 完了
+        - 次に全グリッパーを同時に loose 完了
 
+    Returns:
+      {
+        "init":  {"left": True, "right": True, ...},
+        "loose": {"left": True, "right": True, ...},
+      }
+    """
+    results: Dict[str, Dict[str, bool]] = {}
+
+    def _sleep_yield():
+        # CPU占有を避ける最小sleep（I/Oが即返る想定でも入れるのが無難）
+        time.sleep(0.001)
+
+    try:
+        for stage in stages:
+            done_map: Dict[str, bool] = {g.name: False for g in grippers}
+
+            # stage開始（全グリッパー reset=True）
+            if stage == "init":
+                for g in grippers:
+                    open_then_shrink_until_current_threshold_step(
+                        interface,
+                        open_close_cmd=g.init_open_close_cmd,
+                        shrink_cmd=g.init_shrink_cmd,
+                        threshold=g.init_threshold,
+                        wait_s=g.init_wait_s,
+                        servo_a_id=g.servo_a_id,
+                        servo_b_id=g.servo_b_id,
+                        reset=True,
+                    )
+
+                while not all(done_map.values()):
+                    for g in grippers:
+                        if done_map[g.name]:
+                            continue
+                        done_map[g.name] = bool(
+                            open_then_shrink_until_current_threshold_step(
+                                interface,
+                                open_close_cmd=g.init_open_close_cmd,
+                                shrink_cmd=g.init_shrink_cmd,
+                                threshold=g.init_threshold,
+                                wait_s=g.init_wait_s,
+                                servo_a_id=g.servo_a_id,
+                                servo_b_id=g.servo_b_id,
+                                reset=False,
+                            )
+                        )
+                    _sleep_yield()
+
+            elif stage == "loose":
+                for g in grippers:
+                    extend_until_current_threshold_step(
+                        interface,
+                        extend_cmd=g.loose_extend_cmd,
+                        threshold=g.loose_threshold,
+                        servo_a_id=g.servo_a_id,
+                        servo_b_id=g.servo_b_id,
+                        reset=True,
+                        # ↓ これら引数を extend_until_current_threshold_step が持つ場合のみ有効
+                        preclose_cmd=g.loose_preclose_cmd,
+                        preclose_wait_s=g.loose_preclose_wait_s,
+                        low_hold_s=g.loose_low_hold_s,
+                        max_time=g.loose_max_time,
+                    )
+
+                while not all(done_map.values()):
+                    for g in grippers:
+                        if done_map[g.name]:
+                            continue
+                        done_map[g.name] = bool(
+                            extend_until_current_threshold_step(
+                                interface,
+                                extend_cmd=g.loose_extend_cmd,
+                                threshold=g.loose_threshold,
+                                servo_a_id=g.servo_a_id,
+                                servo_b_id=g.servo_b_id,
+                                reset=False,
+                                preclose_cmd=g.loose_preclose_cmd,
+                                preclose_wait_s=g.loose_preclose_wait_s,
+                                low_hold_s=g.loose_low_hold_s,
+                                max_time=g.loose_max_time,
+                            )
+                        )
+                    _sleep_yield()
+
+            else:
+                raise ValueError(f"Unknown stage: {stage}")
+
+            results[stage] = done_map
+
+    except KeyboardInterrupt:
+        # 途中停止時は関与しているサーボを止める
+        for g in grippers:
+            _stop_two_servos(interface, g.servo_a_id, g.servo_b_id)
+        raise
+
+    return results
+
+def init_both_gripper():
+    interface.angle_vector([-60, -60, 90], servo_ids=[2, 3, 9])
+    time.sleep(3)
+    res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
+    print(res)
+        
 def init_left_gripper():
     # command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([-60], servo_ids=[3])
     time.sleep(3)
-    init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
-    loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
+    # init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
+    # loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
 
 def init_right_gripper():
     # command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
@@ -452,6 +569,8 @@ def init_right_gripper():
 
 def loosen_left_stopper():
     print("loosen stopper")
+    # init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
+    # loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([-90], servo_ids=[3])
     time.sleep(3)
@@ -463,10 +582,15 @@ def loosen_left_stopper():
 
 def loosen_left_stopper2():
     print("loosen stopper")
+    # init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
+    # loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
+    res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
+    print(res)
+    
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([-90], servo_ids=[3])
-    time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=3.0, servo_a_id = 5, servo_b_id = 7)
+    time.sleep(2)
+    command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
 
     command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
@@ -481,9 +605,11 @@ def loosen_left_stopper2():
     command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
 
     interface.angle_vector([120], servo_ids=[3])
-    time.sleep(3)
+    time.sleep(2)
 
 def insert_left_stopper():
     print("insert stopper")
@@ -498,12 +624,12 @@ def insert_left_stopper():
 def insert_left_stopper2():
     print("insert stopper")
     interface.angle_vector([-90], servo_ids=[3])
-    time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=3, servo_a_id = 5, servo_b_id = 7)
+    time.sleep(2)
+    command_diff_drive_for_duration(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=-20.0, duration_s=3, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([120], servo_ids=[3])
-    time.sleep(3)
+    time.sleep(2)
 
 def loosen_right_stopper():
     print("loosen stopper")
@@ -526,21 +652,37 @@ def insert_right_stopper():
     interface.angle_vector([120], servo_ids=[2])
     time.sleep(5)
 
+left = GripperConfig(
+    name="left",
+    servo_a_id=5,
+    servo_b_id=7,
+    init_threshold=2.5,
+    init_shrink_cmd=20.0,
+    loose_threshold=0.5,
+    loose_extend_cmd=40.0,
+)
 
-# def insert_stopper():
-#     print("insert stopper")
-#     interface.angle_vector([-90], servo_ids=[3])
-#     time.sleep(3)
-#     interface.angle_vector([0, -4], servo_ids=[5, 7])
-#     time.sleep(1)
-#     interface.angle_vector([-10, -10], servo_ids=[5, 7])
-#     time.sleep(11)
-#     interface.angle_vector([0, 2], servo_ids=[5, 7])
-#     time.sleep(1)
-#     interface.angle_vector([10, 10], servo_ids=[5, 7])
-#     time.sleep(11)
-#     interface.angle_vector([0, 0], servo_ids=[5, 7])
-#     interface.angle_vector([120], servo_ids=[3])
+right = GripperConfig(
+    name="right",
+    servo_a_id=4,
+    servo_b_id=6,
+    init_threshold=2.5,   # グリッパーごとに条件を変えられる
+    init_shrink_cmd=20.0,
+    loose_threshold=0.5,
+    loose_extend_cmd=40.0,
+)
+
+def open_gripper_init():
+    print("open gripper init")
+    interface.hold()
+    # res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
+    # # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
+    # print(res)
+    # release_vial()
+    init_both_gripper()
+
+# res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
+# print(res)
 
 def left_loop_test():
     try:
@@ -556,6 +698,7 @@ if __name__ == "__main__":
         print(interface.auto_open())
         interface.switch_reading_servo_current(True)
         open_gripper_init()
+        left_loop_test()
         # loosen_stopper()
         # insert_stopper()
     except Exception as e:
