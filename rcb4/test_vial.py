@@ -1,11 +1,11 @@
 from rcb4.armh7interface import ARMH7Interface
 import numpy as np
 import time
-from typing import Tuple
 from dataclasses import dataclass
-from typing import List, Dict, Sequence, Literal
+from typing import List, Dict, Sequence, Literal, Tuple, Iterable
 
 GripperStage = Literal["init", "loose"]
+ServoPair = Tuple[int, int]
 
 @dataclass(frozen=True)
 class GripperConfig:
@@ -49,8 +49,8 @@ def demo():
 
 def hold_vial():
     print("hold vial")
-    command_single_dof_for_duration(interface, cmd = 20, duration_s=4.0, servo_id = 1)
-    # command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=4.0, servo_a_id = 0, servo_b_id = 1)
+    # command_single_dof_for_duration(interface, cmd = 20, duration_s=4.0, servo_id = 1)
+    command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=4.0, servo_a_id = 0, servo_b_id = 1)
 
 def release_vial():
     print("release vial")
@@ -138,6 +138,49 @@ def command_diff_drive_for_duration(
         _stop_two_servos(interface, servo_a_id, servo_b_id)
 
     return a_cmd, b_cmd
+
+def command_diff_drive_for_duration_multi(
+    interface,
+    close_cmd: float,
+    extend_cmd: float,
+    duration_s: float,
+    servo_pairs: Iterable[ServoPair],
+    stop_after: bool = True,
+) -> List[Tuple[int, int, float, float]]:
+    """
+    同じ差動2自由度指令（close_cmd, extend_cmd）を、複数のサーボIDペアへ送る（ブロッキング）。
+
+    Args:
+        interface   : ARMH7Interface 等
+        close_cmd   : 開閉自由度指令（正=閉/負=開）
+        extend_cmd  : 直動自由度指令（正=伸び/負=縮み）
+        duration_s  : 指令を与える時間 [s]
+        servo_pairs : (servo_a_id, servo_b_id) の iterable
+        stop_after  : Trueなら duration_s 後に各ペアへ 0,0 を送って停止
+
+    Returns:
+        List of (servo_a_id, servo_b_id, a_cmd, b_cmd) 送った実指令値の記録
+    """
+    sent: List[Tuple[int, int, float, float]] = []
+
+    # 各ペアへ同じ自由度指令を送信
+    for a_id, b_id in servo_pairs:
+        a_cmd, b_cmd = command_diff_drive_2dof(
+            interface,
+            close_cmd=close_cmd,
+            extend_cmd=extend_cmd,
+            servo_a_id=a_id,
+            servo_b_id=b_id,
+        )
+        sent.append((a_id, b_id, float(a_cmd), float(b_cmd)))
+
+    time.sleep(float(duration_s))
+
+    if stop_after:
+        for a_id, b_id, _, _ in sent:
+            _stop_two_servos(interface, a_id, b_id)
+
+    return sent
 
 def command_single_dof_for_duration(
     interface,
@@ -549,9 +592,9 @@ def run_grippers_sequence_parallel(
 
 def init_both_gripper():
     interface.angle_vector([-60, -60, 90], servo_ids=[2, 3, 9])
-    time.sleep(3)
-    res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
-    print(res)
+    time.sleep(2)
+    # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
+    # print(res)
         
 def init_left_gripper():
     # command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
@@ -567,23 +610,9 @@ def init_right_gripper():
     init_gripper(interface, servo_a_id = 4, servo_b_id = 6, shrink_cmd = 40)
     loose_gripper(interface, servo_a_id = 4, servo_b_id = 6, extend_cmd = 40)
 
+
 def loosen_left_stopper():
     print("loosen stopper")
-    # init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
-    # loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([-90], servo_ids=[3])
-    time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([120], servo_ids=[3])
-    time.sleep(5)
-
-def loosen_left_stopper2():
-    print("loosen stopper")
-    # init_gripper(interface, servo_a_id = 5, servo_b_id = 7, shrink_cmd = 40)
-    # loose_gripper(interface, servo_a_id = 5, servo_b_id = 7, extend_cmd = 40)
     res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
     print(res)
     
@@ -614,16 +643,6 @@ def loosen_left_stopper2():
 def insert_left_stopper():
     print("insert stopper")
     interface.angle_vector([-90], servo_ids=[3])
-    time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=7, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=-20.0, duration_s=7, servo_a_id = 5, servo_b_id = 7)
-    interface.angle_vector([120], servo_ids=[3])
-    time.sleep(3)
-
-def insert_left_stopper2():
-    print("insert stopper")
-    interface.angle_vector([-90], servo_ids=[3])
     time.sleep(2)
     command_diff_drive_for_duration(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
@@ -652,6 +671,50 @@ def insert_right_stopper():
     interface.angle_vector([120], servo_ids=[2])
     time.sleep(5)
 
+pairs = [(5, 7), (4, 6)]
+
+def loosen_both_stopper():
+    print("loosen stopper")
+    res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
+    print(res)
+    
+    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
+    interface.angle_vector([-90, -90], servo_ids=[2, 3])
+    time.sleep(2)
+
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
+
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+
+    interface.angle_vector([120, 120], servo_ids=[2, 3])
+    time.sleep(2)
+
+def insert_both_stopper():
+    print("insert stopper")
+    interface.angle_vector([-90, -90], servo_ids=[2, 3])
+    time.sleep(2)
+    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
+
+    interface.angle_vector([-60, -60], servo_ids=[2, 3])
+    time.sleep(2)
+
+
 left = GripperConfig(
     name="left",
     servo_a_id=5,
@@ -678,7 +741,7 @@ def open_gripper_init():
     # res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
     # # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     # print(res)
-    # release_vial()
+    release_vial()
     init_both_gripper()
 
 # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
@@ -687,8 +750,28 @@ def open_gripper_init():
 def left_loop_test():
     try:
         while True:
-            loosen_left_stopper2()
-            insert_left_stopper2()
+            loosen_left_stopper()
+            insert_left_stopper()
+    except KeyboardInterrupt:
+        print("\nStopped by user")
+
+def both_single_test():
+    loosen_both_stopper()
+    interface.angle_vector([-90], servo_ids=[9])
+    time.sleep(3)
+    interface.angle_vector([90], servo_ids=[9])
+    time.sleep(3)
+    insert_both_stopper()
+
+def both_loop_test():
+    try:
+        while True:
+            loosen_both_stopper()
+            interface.angle_vector([-90], servo_ids=[9])
+            time.sleep(3)
+            interface.angle_vector([90], servo_ids=[9])
+            time.sleep(3)
+            insert_both_stopper()
     except KeyboardInterrupt:
         print("\nStopped by user")
 
@@ -698,9 +781,7 @@ if __name__ == "__main__":
         print(interface.auto_open())
         interface.switch_reading_servo_current(True)
         open_gripper_init()
-        left_loop_test()
-        # loosen_stopper()
-        # insert_stopper()
+        # both_loop_test()
     except Exception as e:
         if "LIBUSB_ERROR_ACCESS" in str(e):
             # Error already handled and printed by the class method
