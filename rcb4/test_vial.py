@@ -50,11 +50,11 @@ def demo():
 def hold_vial():
     print("hold vial")
     # command_single_dof_for_duration(interface, cmd = 20, duration_s=4.0, servo_id = 1)
-    command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=4.0, servo_a_id = 0, servo_b_id = 1)
+    command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=2.7, servo_a_id = 0, servo_b_id = 1)
 
 def release_vial():
     print("release vial")
-    command_two_dof_for_duration(interface, cmd_a = -20, cmd_b = -20, duration_s=3.0, servo_a_id = 0, servo_b_id = 1)
+    command_two_dof_for_duration(interface, cmd_a = -20, cmd_b = -20, duration_s=4.5, servo_a_id = 0, servo_b_id = 1)
     command_two_dof_for_duration(interface, cmd_a = 30, cmd_b = 30, duration_s=0.5, servo_a_id = 0, servo_b_id = 1)
 
 def loop_task():
