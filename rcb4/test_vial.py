@@ -612,7 +612,7 @@ def init_right_gripper():
 
 
 def loosen_left_stopper():
-    print("loosen stopper")
+    print("loosen left stopper")
     res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
     print(res)
     
@@ -620,54 +620,72 @@ def loosen_left_stopper():
     interface.angle_vector([-90], servo_ids=[3])
     time.sleep(2)
     command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
 
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
 
     interface.angle_vector([120], servo_ids=[3])
     time.sleep(2)
 
 def insert_left_stopper():
-    print("insert stopper")
+    print("insert left stopper")
     interface.angle_vector([-90], servo_ids=[3])
     time.sleep(2)
-    command_diff_drive_for_duration(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 5, servo_b_id = 7)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=1.0, extend_cmd=20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=0.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
+    command_diff_drive_for_duration(interface, close_cmd=-4.0, extend_cmd=-20.0, duration_s=3.5, servo_a_id = 5, servo_b_id = 7)
     interface.angle_vector([120], servo_ids=[3])
     time.sleep(2)
 
 def loosen_right_stopper():
-    print("loosen stopper")
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
+    print("loosen right stopper")
+    res = run_grippers_sequence_parallel(interface, [right], stages=("init", "loose"))
+    print(res)
+    
+    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
     interface.angle_vector([-90], servo_ids=[2])
-    time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=15.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
+    time.sleep(2)
+    command_diff_drive_for_duration(interface, close_cmd=-3.0, extend_cmd=30.0, duration_s=3.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
+
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+
     interface.angle_vector([120], servo_ids=[2])
-    time.sleep(5)
+    time.sleep(2)
 
 def insert_right_stopper():
     print("insert stopper")
     interface.angle_vector([-90], servo_ids=[2])
     time.sleep(3)
-    command_diff_drive_for_duration(interface, close_cmd=0.0, extend_cmd=20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=-5.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=7.0, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=1.0, extend_cmd=30.0, duration_s=3.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=-3.0, extend_cmd=0.0, duration_s=3.5, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=-3.0, extend_cmd=-20.0, duration_s=3.5, servo_a_id = 4, servo_b_id = 6)
     interface.angle_vector([120], servo_ids=[2])
     time.sleep(5)
 
@@ -684,7 +702,7 @@ def loosen_both_stopper():
 
     # command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=50.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
 
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
@@ -723,9 +741,12 @@ def insert_both_stopper():
     print("insert stopper")
     interface.angle_vector([-90, -90], servo_ids=[2, 3])
     time.sleep(2)
-    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
+    # command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
+    # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
+    # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
 
     interface.angle_vector([-60, -60], servo_ids=[2, 3])
     time.sleep(2)
@@ -745,7 +766,8 @@ right = GripperConfig(
     name="right",
     servo_a_id=4,
     servo_b_id=6,
-    init_threshold=2.5,   # グリッパーごとに条件を変えられる
+    init_threshold=3.0,   # グリッパーごとに条件を変えられる
+    # init_threshold=2.5,   # グリッパーごとに条件を変えられる
     init_shrink_cmd=20.0,
     loose_threshold=0.5,
     loose_extend_cmd=40.0,
@@ -768,6 +790,14 @@ def left_loop_test():
         while True:
             loosen_left_stopper()
             insert_left_stopper()
+    except KeyboardInterrupt:
+        print("\nStopped by user")
+
+def right_loop_test():
+    try:
+        while True:
+            loosen_right_stopper()
+            insert_right_stopper()
     except KeyboardInterrupt:
         print("\nStopped by user")
 
