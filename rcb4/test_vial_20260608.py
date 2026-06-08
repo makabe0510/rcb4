@@ -50,7 +50,8 @@ def demo():
 def hold_vial():
     print("hold vial")
     # command_single_dof_for_duration(interface, cmd = 20, duration_s=4.0, servo_id = 1)
-    command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=2.7, servo_a_id = 0, servo_b_id = 1)
+    command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=3, servo_a_id = 0, servo_b_id = 1)
+    # command_two_dof_for_duration(interface, cmd_a = 20, cmd_b = 20, duration_s=2.7, servo_a_id = 0, servo_b_id = 1)
 
 def release_vial():
     print("release vial")
@@ -591,8 +592,8 @@ def run_grippers_sequence_parallel(
     return results
 
 def init_both_gripper():
-    interface.angle_vector([-60, -60, 90], servo_ids=[2, 3, 9])
-    time.sleep(2)
+    interface.angle_vector([-60, -60, 90, 35, -35], servo_ids=[2, 3, 9, 10, 11], velocity=50)
+    time.sleep(1.0)
     # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     # print(res)
         
@@ -637,6 +638,7 @@ def loosen_left_stopper():
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 5, servo_b_id = 7)
 
+    interface.angle_vector([-90], servo_ids=[11])# close shutter
     interface.angle_vector([120], servo_ids=[3])
     time.sleep(2)
 
@@ -659,7 +661,7 @@ def loosen_right_stopper():
     interface.angle_vector([-90], servo_ids=[2])
     time.sleep(2)
     command_diff_drive_for_duration(interface, close_cmd=-3.0, extend_cmd=30.0, duration_s=3.5, servo_a_id = 4, servo_b_id = 6)
-    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=2.0, servo_a_id = 4, servo_b_id = 6)
+    command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
 
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
@@ -675,6 +677,7 @@ def loosen_right_stopper():
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
     command_diff_drive_for_duration(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_a_id = 4, servo_b_id = 6)
+    interface.angle_vector([90], servo_ids=[10])# close shutter
 
     interface.angle_vector([120], servo_ids=[2])
     time.sleep(2)
@@ -696,28 +699,28 @@ def loosen_both_stopper():
     res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     print(res)
     
-    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
-    interface.angle_vector([-90, -90], servo_ids=[2, 3])
-    time.sleep(1.5)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=1.0, servo_pairs=pairs)
+    interface.angle_vector([-90, -90], servo_ids=[2, 3], velocity=30)
+    time.sleep(0.35)
 
     # command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=50.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=2.0, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=1.0, servo_pairs=pairs)
 
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=8.0, extend_cmd=0.0, duration_s=0.1, servo_pairs=pairs)
 
     # command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=-20.0, duration_s=0.5, servo_pairs=pairs)
     # command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
@@ -735,23 +738,32 @@ def loosen_both_stopper():
     # command_diff_drive_for_duration_multi(interface, close_cmd=7.0, extend_cmd=0.0, duration_s=0.5, servo_pairs=pairs)
 
     # interface.angle_vector([120, 120], servo_ids=[2, 3])
-    interface.angle_vector([90, 90], servo_ids=[2, 3])
+    # interface.angle_vector([90, -90], servo_ids=[10, 11], velocity=0)# close shutter
+    # time.sleep(0.1)
+    interface.angle_vector([-85, -85], servo_ids=[2, 3], velocity=10)
+    time.sleep(0.2)    
+    interface.angle_vector([90, -90], servo_ids=[10, 11], velocity=0)# close shutter
+    interface.angle_vector([100, 100], servo_ids=[2, 3], velocity=50)
+    time.sleep(0.6)
     # command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
-    time.sleep(2)
 
 def insert_both_stopper():
     print("insert stopper")
-    interface.angle_vector([-90, -90], servo_ids=[2, 3])
-    time.sleep(2)
+    interface.angle_vector([-90, -90], servo_ids=[2, 3], velocity=30)
+    time.sleep(0.3)
     # command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=20.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
-    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
+    # command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=1.0, servo_pairs=pairs)
+    interface.angle_vector([35, -35], servo_ids=[10, 11], velocity=0)# open shutter
+    time.sleep(0.1)
+    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=5.0, servo_pairs=pairs)
+    
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=0.0, duration_s=0.3, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-3.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
     # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
     # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
 
-    interface.angle_vector([-60, -60], servo_ids=[2, 3])
-    time.sleep(2)
+    interface.angle_vector([-60, -60], servo_ids=[2, 3], velocity=30)
+    time.sleep(0.3)
 
 
 left = GripperConfig(
@@ -781,7 +793,7 @@ def open_gripper_init():
     # res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
     # # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     # print(res)
-    release_vial()
+    # release_vial()
     init_both_gripper()
 
 # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
@@ -805,15 +817,19 @@ def right_loop_test():
 
 def both_single_test():
     loosen_both_stopper()
-    interface.angle_vector([-90], servo_ids=[9])
-    time.sleep(3)
-    interface.angle_vector([90], servo_ids=[9])
-    time.sleep(3)
+    interface.angle_vector([-90], servo_ids=[9], velocity=50)
+    time.sleep(0.5)
+    interface.angle_vector([90], servo_ids=[9], velocity=50)
+    time.sleep(0.5)
     insert_both_stopper()
 
 def both_single_testA():
     loosen_both_stopper()
-    interface.angle_vector([-90], servo_ids=[9])
+    interface.angle_vector([-90], servo_ids=[9], velocity=50)
+    time.sleep(1)
+    # interface.angle_vector([35, -35], servo_ids=[10, 11], velocity=0)# open shutter -> do before tonton action
+    # time.sleep(0.1)
+
     # time.sleep(3)
     # interface.angle_vector([90], servo_ids=[9])
     # time.sleep(3)
@@ -823,8 +839,10 @@ def both_single_testB():
     # loosen_both_stopper()
     # interface.angle_vector([-90], servo_ids=[9])
     # time.sleep(3)
-    interface.angle_vector([90], servo_ids=[9])
-    time.sleep(3)
+    interface.angle_vector([90, -90], servo_ids=[10, 11], velocity=0)# close shutter
+    time.sleep(0.1)
+    interface.angle_vector([90], servo_ids=[9], velocity=50)
+    time.sleep(1)
     insert_both_stopper()
 
 def both_loop_test():
