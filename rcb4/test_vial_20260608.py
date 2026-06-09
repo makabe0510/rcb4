@@ -592,8 +592,8 @@ def run_grippers_sequence_parallel(
     return results
 
 def init_both_gripper():
-    interface.angle_vector([-60, -60, 90, 35, -35], servo_ids=[2, 3, 9, 10, 11], velocity=50)
-    time.sleep(1.0)
+    interface.angle_vector([-60, -60, 90, 35, -35], servo_ids=[2, 3, 9, 10, 11], velocity=100)
+    time.sleep(1.2)
     # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     # print(res)
         
@@ -740,8 +740,8 @@ def loosen_both_stopper():
     # interface.angle_vector([120, 120], servo_ids=[2, 3])
     # interface.angle_vector([90, -90], servo_ids=[10, 11], velocity=0)# close shutter
     # time.sleep(0.1)
-    interface.angle_vector([-85, -85], servo_ids=[2, 3], velocity=10)
-    time.sleep(0.2)    
+    interface.angle_vector([-80, -80], servo_ids=[2, 3], velocity=30)
+    time.sleep(0.4)    
     interface.angle_vector([90, -90], servo_ids=[10, 11], velocity=0)# close shutter
     interface.angle_vector([100, 100], servo_ids=[2, 3], velocity=50)
     time.sleep(0.6)
@@ -757,8 +757,14 @@ def insert_both_stopper():
     time.sleep(0.1)
     command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=5.0, servo_pairs=pairs)
     
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.5, extend_cmd=0.0, duration_s=0.3, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=-4.5, extend_cmd=-20.0, duration_s=2.0, servo_pairs=pairs)
+
+    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=0.0, duration_s=1.0, servo_pairs=pairs)
+    command_diff_drive_for_duration_multi(interface, close_cmd=3.0, extend_cmd=15.0, duration_s=1.3, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=-4.0, extend_cmd=0.0, duration_s=0.3, servo_pairs=pairs)
     command_diff_drive_for_duration_multi(interface, close_cmd=-3.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
+    
     # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=0.0, duration_s=3.5, servo_pairs=pairs)
     # command_diff_drive_for_duration_multi(interface, close_cmd=-2.0, extend_cmd=-20.0, duration_s=3.5, servo_pairs=pairs)
 
@@ -793,7 +799,7 @@ def open_gripper_init():
     # res = run_grippers_sequence_parallel(interface, [left], stages=("init", "loose"))
     # # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
     # print(res)
-    # release_vial()
+    release_vial()
     init_both_gripper()
 
 # res = run_grippers_sequence_parallel(interface, [left, right], stages=("init", "loose"))
